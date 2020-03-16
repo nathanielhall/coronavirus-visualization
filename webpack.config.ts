@@ -38,8 +38,8 @@ const config: Configuration = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      inject: true,
-      template: path.join(APP_PATH, 'index.html')
+      favicon: './src/assets/favicon.ico',
+      template: path.join(__dirname, './src/index.html')
     })
   ]
 }
