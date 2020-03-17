@@ -5,6 +5,7 @@ import { Header, HeaderProps } from './Header'
 const setup = (propOverrides?: Partial<HeaderProps>) => {
   const props = {
     title: 'header title here',
+    handleDrawerOpen: jest.fn(),
     ...propOverrides
   }
   const wrapper: ReactWrapper = mount(
