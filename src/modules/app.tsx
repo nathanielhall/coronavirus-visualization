@@ -89,14 +89,18 @@ export const App: FC<AppProps> = () => {
         />
       </Header>
       <main>
-        {statsRequest.loading && <span>Loading...</span>}
-        {statsRequest.error && <div>Error!</div>}
-        {statsResponse && statsResponse.data && statsResponse.data.length > 0 && (
-          <Map
-            center={[statsResponse.data[0].lat, statsResponse.data[0].long]}
-            zoom={3}
-          >
-            {statsResponse.data.map((confirmed, index) => (
+        <Map
+          center={
+            statsResponse && statsResponse.data.length > 0
+              ? [statsResponse.data[0].lat, statsResponse.data[0].long]
+              : [40.4, -95.7]
+          }
+          zoom={3}
+        >
+          {statsRequest.loading && <span>Loading...</span>}
+          {statsRequest.error && <div>Error!</div>}
+          {statsResponse &&
+            statsResponse.data.map((confirmed, index) => (
               <MapMarker
                 id={index}
                 key={index}
@@ -126,8 +130,7 @@ export const App: FC<AppProps> = () => {
                 </div>
               </MapMarker>
             ))}
-          </Map>
-        )}
+        </Map>
       </main>
     </React.Fragment>
   )
