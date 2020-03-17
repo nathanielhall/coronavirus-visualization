@@ -28,7 +28,7 @@ the browser doesn't open, try typing in the address.
 
 This is what you are looking for:
 
-<img src="screenshot.png" alt="App Screenshot" title="App Screenshot" width="700" />
+<img src="app_screenshot.png" alt="App Screenshot" title="App Screenshot" width="700" />
 
 ## Scripts
 
