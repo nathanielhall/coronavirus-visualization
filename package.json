@@ -1,5 +1,5 @@
 {
-  "name": "starter-app-typescript",
+  "name": "coronavirus-visualization",
   "version": "1.0.0",
   "description": "React/TypeScript starter app for creating front end applications",
   "main": "index.js",
@@ -8,6 +8,8 @@
     "start": "webpack-dev-server --config webpack.config.ts --progress --colors --open --mode=development",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
     "prettier": "prettier --write \"./**/*.{json,ts,tsx,scss}\""
   },
   "keywords": [
@@ -18,8 +20,9 @@
   "author": "Nathaniel C. Hall",
   "license": "MIT",
   "devDependencies": {
+    "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/html-webpack-plugin": "^3.2.1",
-    "@types/jest": "^24.0.20",
+    "@types/jest": "^24.9.1",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
     "@types/react-test-renderer": "^16.9.1",
@@ -40,6 +43,7 @@
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "style-loader": "^1.0.0",
+    "ts-jest": "^25.2.1",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.8.3",
@@ -70,7 +74,8 @@
     ],
     "moduleFileExtensions": [
       "ts",
-      "tsx"
+      "tsx",
+      "js"
     ],
     "moduleNameMapper": {
       "^src(.*)$": "<rootDir>/src$1",
@@ -83,6 +88,9 @@
       "./enzyme.config.ts"
     ],
     "testRegex": "(/__tests__/.*|(\\.|/)(test))\\.tsx?$",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
     "verbose": true
   }
 }

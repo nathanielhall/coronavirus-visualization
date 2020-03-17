@@ -26,7 +26,13 @@ const config: Configuration = {
     rules: [
       {
         test: /\.(ts)x?$/,
-        exclude: /node_modules/,
+        exclude: [
+          /dist/,
+          /node_modules/,
+          /\\.test\\.tsx?$/,
+          /__tests__/,
+          /typings/
+        ],
         use: [{ loader: 'ts-loader' }]
       },
       {
