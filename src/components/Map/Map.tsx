@@ -12,7 +12,7 @@ export type MapProps = {
 export const Map: FC<MapProps> = ({ center, zoom, children }) => {
   return (
     <LeafletMap
-      style={{ width: '100%', height: '100vh' }}
+      style={{ width: '100%', height: '90vh' }}
       center={center}
       zoom={zoom}
     >
