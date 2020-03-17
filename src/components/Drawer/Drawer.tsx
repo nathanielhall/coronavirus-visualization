@@ -1,5 +1,4 @@
-import React, { FC } from 'react'
-import clsx from 'clsx'
+import React, { FC, ReactNode } from 'react'
 import {
   makeStyles,
   useTheme,
@@ -11,6 +10,7 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import IconButton from '@material-ui/core/IconButton'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
+import Divider from '@material-ui/core/Divider'
 
 const drawerWidth = 240
 
@@ -73,10 +73,15 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export type DrawerProps = {
-  onDrawerClose: () => void
+  handleDrawerClose: () => void
   open: boolean
+  children?: ReactNode
 }
-export const Drawer: FC<DrawerProps> = ({ onDrawerClose, open }) => {
+export const Drawer: FC<DrawerProps> = ({
+  handleDrawerClose,
+  open,
+  children
+}) => {
   const classes = useStyles()
   const theme = useTheme()
 
@@ -94,7 +99,7 @@ export const Drawer: FC<DrawerProps> = ({ onDrawerClose, open }) => {
         }}
       >
         <div className={classes.drawerHeader}>
-          <IconButton onClick={onDrawerClose}>
+          <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'ltr' ? (
               <ChevronLeftIcon />
             ) : (
@@ -102,15 +107,9 @@ export const Drawer: FC<DrawerProps> = ({ onDrawerClose, open }) => {
             )}
           </IconButton>
         </div>
+        <Divider />
+        {children}
       </MuiDrawer>
-
-      <main
-        className={clsx(classes.content, {
-          [classes.contentShift]: open
-        })}
-      >
-        <div className={classes.drawerHeader} />
-      </main>
     </div>
   )
 }
