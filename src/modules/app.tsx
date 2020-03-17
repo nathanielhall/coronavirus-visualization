@@ -1,6 +1,61 @@
-import React, { FC } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
 import { useApi } from 'src/api'
+import { Typography } from '@material-ui/core'
+import { Autocomplete } from 'components/Autocomplete'
+import { Header } from 'components/Header'
+
+type Country = {
+  name: string
+  code: string
+}
+
+type CountriesApi = {
+  [key: string]: string
+}
+
+export const CountrySelect = () => {
+  const [countries, setCountries] = useState<Country[]>()
+  const [request] = useApi<CountriesApi>()
+
+  useEffect(() => {
+    const getCountries = async () => {
+      request
+        .get<CountriesApi>('https://covid19.mathdro.id/api/countries')
+        .then((response) => {
+          if (response.status === 200) {
+            const myCountries: Country[] = Object.entries(
+              response.data.countries
+            ).map(([country, code]) => {
+              return { name: country, code }
+            })
+            setCountries(myCountries)
+          }
+        })
+    }
+
+    getCountries()
+  }, [])
+
+  if (!countries) return null
+
+  // return <pre>{JSON.stringify(countries, null, 2)}</pre>
+  return (
+    <Autocomplete
+      name="countries"
+      data={countries}
+      inputLabel={''}
+      disableCloseOnSelect
+      getOptionLabel={(option: Country) => option.name}
+      renderOption={(option: Country) => (
+        <>
+          <span>{option.code}</span>
+          {option.name}
+        </>
+      )}
+    />
+  )
+}
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
@@ -22,6 +77,9 @@ export const App: FC<AppProps> = () => {
 
   return (
     <React.Fragment>
+      <Header title="Coronavirus Visualization">
+        <CountrySelect />
+      </Header>
       <main>
         {request.loading && <span>Loading...</span>}
         {request.error && <div>Error!</div>}
@@ -37,7 +95,9 @@ export const App: FC<AppProps> = () => {
                 <div>
                   <div>
                     <span>
-                      <b>{confirmed.provinceState}</b>
+                      <Typography variant="h5">
+                        {confirmed.provinceState}
+                      </Typography>
                     </span>
                   </div>
                   <div>
