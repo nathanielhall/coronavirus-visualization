@@ -33,6 +33,8 @@ const setup = (propOverrides?: Partial<AutocompleteProps<CountryType>>) => {
         {option.label} ({option.code}) +{option.phone}
       </>
     ),
+    value: null,
+    onChange: jest.fn(),
     testId: 'autocomplete123',
     ...propOverrides
   }

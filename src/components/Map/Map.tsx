@@ -31,6 +31,21 @@ const useStyles = makeStyles({
   }
 })
 
+// import Icon from '@material-ui/icons/PersonOutline'
+// import L from 'leaflet'
+
+// const iconPerson = new L.Icon({
+//   iconUrl: ,
+//   iconRetinaUrl: require('../img/marker-pin-person.svg'),
+//   iconAnchor: undefined,
+//   popupAnchor: undefined,
+//   shadowUrl: undefined,
+//   shadowSize: undefined,
+//   shadowAnchor: undefined,
+//   iconSize: new L.Point(60, 75),
+//   className: 'leaflet-div-icon'
+// })
+
 export type MapMarkerProps = {
   id: number
   onClose?: () => void
