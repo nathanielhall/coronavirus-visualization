@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { ReactElement, ChangeEvent } from 'react'
 import TextField from '@material-ui/core/TextField'
 import MuiAutocomplete from '@material-ui/lab/Autocomplete'
 import { makeStyles } from '@material-ui/core/styles'
@@ -25,6 +25,8 @@ export type AutocompleteProps<TData> = {
   renderOption: (data: TData) => JSX.Element
   testId?: string
   disableCloseOnSelect?: boolean
+  value: TData | null
+  onChange: (event: ChangeEvent<{}>, value: TData | null) => void
   //style?: React.CSSProperties;
 }
 
@@ -37,7 +39,9 @@ export const Autocomplete: <TData>(
   getOptionLabel,
   renderOption,
   disableCloseOnSelect = false,
-  testId = 'autocomplete'
+  testId = 'autocomplete',
+  value,
+  onChange
 }) => {
   const classes = useStyles()
 
@@ -53,7 +57,8 @@ export const Autocomplete: <TData>(
       autoHighlight
       getOptionLabel={getOptionLabel}
       renderOption={renderOption}
-      color="inherit"
+      value={value}
+      onChange={onChange}
       renderInput={(params) => (
         <TextField
           {...params}
