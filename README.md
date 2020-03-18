@@ -1,8 +1,8 @@
 # Coronavirus Visualization <img alt="Travis CI badge" src="https://travis-ci.org/nathanielhall/meteorite-impact-visualization.svg?branch=refactor">
 
 > React application to show statistics on the coronavirus (COVID-19) using
-> React-Leaflet Map. The data comes from  
-> [https://github.com/mathdroid/covid-19-api](COVID-19 API).
+> React-Leaflet Map. The data comes from
+> [COVID-19 API](https://github.com/mathdroid/covid-19-api).
 
 ## System Requirements
 
