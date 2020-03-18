@@ -29,6 +29,10 @@ type CountryData = {
   deaths: number
   active: number
 }
+type MapDisplayProps = {
+  center: [number, number]
+  zoom: number
+}
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
   const [countriesRequest] = useApi<CountriesApi>()
@@ -40,6 +44,19 @@ export const App: FC<AppProps> = () => {
       : undefined
   )
   const [openDrawer, setOpenDrawer] = useState<boolean>(false)
+  const [mapDisplayProps, setMapDisplayProps] = useState<MapDisplayProps>({
+    center: [40.4, -95.7],
+    zoom: 4
+  })
+
+  const listItemClick = (item: CountryData) => {
+    const newProps: MapDisplayProps = {
+      center: [item.lat, item.long],
+      zoom: 7
+    }
+
+    setMapDisplayProps(newProps)
+  }
 
   // Get list of countries for <Autocomplete /> and apply data manipulations
   useEffect(() => {
@@ -61,11 +78,23 @@ export const App: FC<AppProps> = () => {
     getCountries()
   }, [])
 
+  useEffect(() => {
+    setMapDisplayProps({
+      center:
+        statsResponse && statsResponse.data.length > 0
+          ? [statsResponse.data[0].lat, statsResponse.data[0].long]
+          : [40.4, -95.7],
+      zoom: 4
+    })
+  }, [statsResponse])
+
   const handleDrawerOpen = () => setOpenDrawer(true)
   const handleDrawerClose = () => setOpenDrawer(false)
 
-  // Render null until we get back all countries
-  // TODO: display loading icon?
+  // TODO: Restructure page
+  //    1) Ensure map is always present
+  //    2) how handle api loading and errors (inside map and outside such as countries for autocomplete)
+  //    3) default country basd on users location
   if (!countries) return null
 
   return (
@@ -95,14 +124,7 @@ export const App: FC<AppProps> = () => {
       </Header>
 
       <main>
-        <Map
-          center={
-            statsResponse && statsResponse.data.length > 0
-              ? [statsResponse.data[0].lat, statsResponse.data[0].long]
-              : [40.4, -95.7]
-          }
-          zoom={3}
-        >
+        <Map center={mapDisplayProps.center} zoom={mapDisplayProps.zoom}>
           {statsRequest.loading && <span>Loading...</span>}
           {statsRequest.error && <div>Error!</div>}
           {statsResponse &&
@@ -143,7 +165,7 @@ export const App: FC<AppProps> = () => {
           {statsResponse &&
             statsResponse.data &&
             statsResponse.data.map((item, index) => (
-              <ListItem button key={index}>
+              <ListItem button key={index} onClick={() => listItemClick(item)}>
                 <ListItemText
                   primary={`${item.provinceState || item.countryRegion} (${
                     item.confirmed
