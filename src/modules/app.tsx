@@ -32,7 +32,10 @@ export type AppProps = {}
 export const App: FC<AppProps> = () => {
   const [countriesRequest] = useApi<CountriesApi>()
   const [countries, setCountries] = useState<Country[]>()
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>({
+    code: 'US',
+    name: 'US'
+  })
   const [statsRequest, statsResponse] = useApi<CountryData[]>(
     selectedCountry
       ? `https://covid19.mathdro.id/api/countries/${selectedCountry.code}/confirmed`
@@ -40,7 +43,7 @@ export const App: FC<AppProps> = () => {
   )
   const [openDrawer, setOpenDrawer] = useState<boolean>(false)
   const [mapDisplayProps, setMapDisplayProps] = useState<MapDisplayProps>({
-    center: [40.4, -95.7],
+    center: [40.4, -125.7],
     zoom: 4
   })
 
