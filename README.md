@@ -1,7 +1,7 @@
 # Coronavirus Visualization <img alt="Travis CI badge" src="https://travis-ci.org/nathanielhall/meteorite-impact-visualization.svg?branch=refactor">
 
-> React application to show statistics on the coronavirus using React-Leaflet
-> Map
+> React application to show statistics on the coronavirus (COVID-19) using
+> React-Leaflet Map
 
 ## System Requirements
 
