@@ -7,10 +7,8 @@ import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
-// import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 
-// TODO: break this component up? Too big
 type Country = {
   name: string
   code: string
@@ -58,7 +56,7 @@ export const App: FC<AppProps> = () => {
     setMapDisplayProps(newProps)
   }
 
-  // Get list of countries for <Autocomplete /> and apply data manipulations
+  // When app first loads, retrieve countries and format data
   useEffect(() => {
     const getCountries = async () => {
       countriesRequest
@@ -78,6 +76,7 @@ export const App: FC<AppProps> = () => {
     getCountries()
   }, [])
 
+  // when country statistics are retrieved move the center position and zoom
   useEffect(() => {
     setMapDisplayProps({
       center:
@@ -91,10 +90,7 @@ export const App: FC<AppProps> = () => {
   const handleDrawerOpen = () => setOpenDrawer(true)
   const handleDrawerClose = () => setOpenDrawer(false)
 
-  // TODO: Restructure page
-  //    1) Ensure map is always present
-  //    2) how handle api loading and errors (inside map and outside such as countries for autocomplete)
-  //    3) default country basd on users location
+  // wait for countries before rendering map
   if (!countries) return null
 
   return (
@@ -128,34 +124,14 @@ export const App: FC<AppProps> = () => {
           {statsRequest.loading && <span>Loading...</span>}
           {statsRequest.error && <div>Error!</div>}
           {statsResponse &&
-            statsResponse.data.map((confirmed, index) => (
+            statsResponse.data.map((stat, index) => (
               <MapMarker
                 id={index}
                 key={index}
                 onClose={() => console.log('closed')}
-                position={[confirmed.lat, confirmed.long]}
+                position={[stat.lat, stat.long]}
               >
-                <div>
-                  <div>
-                    <span>
-                      <Typography variant="h5">
-                        {confirmed.provinceState || confirmed.countryRegion}
-                      </Typography>
-                    </span>
-                  </div>
-                  <div>
-                    <label>Confirmed</label>&nbsp;
-                    <span>{confirmed.confirmed}</span>
-                  </div>
-                  <div>
-                    <label>Deaths</label>&nbsp;
-                    <span>{confirmed.deaths}</span>
-                  </div>
-                  <div>
-                    <label>Recovered</label>&nbsp;
-                    <span>{confirmed.recovered}</span>
-                  </div>
-                </div>
+                <CountryStatistics data={stat} />
               </MapMarker>
             ))}
         </Map>
@@ -177,5 +153,34 @@ export const App: FC<AppProps> = () => {
         </List>
       </Drawer>
     </React.Fragment>
+  )
+}
+
+export type CountryStatisticsProps = {
+  data: CountryData
+}
+export const CountryStatistics: FC<CountryStatisticsProps> = ({ data }) => {
+  return (
+    <div>
+      <div>
+        <span>
+          <Typography variant="h5">
+            {data.provinceState || data.countryRegion}
+          </Typography>
+        </span>
+      </div>
+      <div>
+        <label>Confirmed</label>&nbsp;
+        <span>{data.confirmed}</span>
+      </div>
+      <div>
+        <label>Deaths</label>&nbsp;
+        <span>{data.deaths}</span>
+      </div>
+      <div>
+        <label>Recovered</label>&nbsp;
+        <span>{data.recovered}</span>
+      </div>
+    </div>
   )
 }
