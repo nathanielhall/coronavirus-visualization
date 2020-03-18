@@ -5,6 +5,10 @@ import { Typography } from '@material-ui/core'
 import { Autocomplete } from 'components/Autocomplete'
 import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+// import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
 
 // TODO: break this component up? Too big
 type Country = {
@@ -135,7 +139,20 @@ export const App: FC<AppProps> = () => {
         </Map>
       </main>
       <Drawer handleDrawerClose={handleDrawerClose} open={openDrawer}>
-        <span>Some content here</span>
+        <List>
+          {statsResponse &&
+            statsResponse.data &&
+            statsResponse.data.map((item, index) => (
+              <ListItem button key={index}>
+                <ListItemText
+                  primary={`${item.provinceState || item.countryRegion} (${
+                    item.confirmed
+                  })`}
+                  secondary={`Deaths: ${item.deaths} Recovered: ${item.recovered}`}
+                />
+              </ListItem>
+            ))}
+        </List>
       </Drawer>
     </React.Fragment>
   )
