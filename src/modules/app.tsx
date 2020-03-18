@@ -1,13 +1,10 @@
 import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
-import { useApi } from 'src/api'
-import { Typography } from '@material-ui/core'
 import { Autocomplete } from 'components/Autocomplete'
 import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
+import { useApi } from 'src/api'
+import { Typography, List, ListItem, ListItemText } from '@material-ui/core'
 
 type Country = {
   name: string
@@ -52,7 +49,6 @@ export const App: FC<AppProps> = () => {
       center: [item.lat, item.long],
       zoom: 7
     }
-
     setMapDisplayProps(newProps)
   }
 
