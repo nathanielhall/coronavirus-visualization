@@ -6,6 +6,9 @@ import { Drawer } from 'components/Drawer'
 import { useApi } from 'src/api'
 import { Typography, List, ListItem, ListItemText } from '@material-ui/core'
 
+// https://coronavirus-tracker-api.herokuapp.com/v2/locations
+// https://coronavirus-tracker-api.herokuapp.com/v2/locations/v2/locations?country_code=US
+
 type Country = {
   name: string
   code: string
@@ -13,17 +16,31 @@ type Country = {
 type CountriesApi = {
   [key: string]: string
 }
-type CountryData = {
-  provinceState: string
-  countryRegion: string
-  lastUpdate: number
-  lat: number
-  long: number
-  confirmed: number
-  recovered: number
-  deaths: number
-  active: number
+// type CountryData = {
+//   provinceState: string
+//   countryRegion: string
+//   lastUpdate: number
+//   lat: number
+//   long: number
+//   confirmed: number
+//   recovered: number
+//   deaths: number
+//   active: number
+// }
+
+type CountryDataApi = {
+  locations: Array<CountryData>
 }
+type CountryData = {
+  coordinates: { latitude: number; longitude: number }
+  country: string
+  country_code: string
+  id: number
+  last_updated: Date
+  latest: { confirmed: number; deaths: number; recovered: number }
+  province: string
+}
+
 type MapDisplayProps = {
   center: [number, number]
   zoom: number
@@ -36,9 +53,9 @@ export const App: FC<AppProps> = () => {
     code: 'US',
     name: 'US'
   })
-  const [statsRequest, statsResponse] = useApi<CountryData[]>(
+  const [statsRequest, statsResponse] = useApi<CountryDataApi>(
     selectedCountry
-      ? `https://covid19.mathdro.id/api/countries/${selectedCountry.code}/confirmed`
+      ? `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=${selectedCountry.code}`
       : undefined
   )
   const [openDrawer, setOpenDrawer] = useState<boolean>(false)
@@ -48,8 +65,10 @@ export const App: FC<AppProps> = () => {
   })
 
   const listItemClick = (item: CountryData) => {
+    const { latitude, longitude } = item.coordinates
+
     const newProps: MapDisplayProps = {
-      center: [item.lat, item.long],
+      center: [latitude, longitude],
       zoom: 7
     }
     setMapDisplayProps(newProps)
@@ -77,10 +96,20 @@ export const App: FC<AppProps> = () => {
 
   // when country statistics are retrieved move the center position and zoom
   useEffect(() => {
+    let lat = 40.4
+    let long = -95.7
+    if (statsResponse && statsResponse.data.locations.length > 0) {
+      const {
+        coordinates: { latitude, longitude }
+      } = statsResponse.data.locations[0]
+      lat = latitude
+      long = longitude
+    }
+
     setMapDisplayProps({
       center:
-        statsResponse && statsResponse.data.length > 0
-          ? [statsResponse.data[0].lat, statsResponse.data[0].long]
+        statsResponse && statsResponse.data.locations.length > 0
+          ? [lat, long]
           : [40.4, -95.7],
       zoom: 4
     })
@@ -123,12 +152,15 @@ export const App: FC<AppProps> = () => {
           {statsRequest.loading && <span>Loading...</span>}
           {statsRequest.error && <div>Error!</div>}
           {statsResponse &&
-            statsResponse.data.map((stat, index) => (
+            statsResponse.data.locations.map((stat, index) => (
               <MapMarker
                 id={index}
                 key={index}
                 onClose={() => console.log('closed')}
-                position={[stat.lat, stat.long]}
+                position={[
+                  stat.coordinates.latitude,
+                  stat.coordinates.longitude
+                ]}
               >
                 <CountryStatistics data={stat} />
               </MapMarker>
@@ -139,13 +171,13 @@ export const App: FC<AppProps> = () => {
         <List>
           {statsResponse &&
             statsResponse.data &&
-            statsResponse.data.map((item, index) => (
+            statsResponse.data.locations.map((item, index) => (
               <ListItem button key={index} onClick={() => listItemClick(item)}>
                 <ListItemText
-                  primary={`${item.provinceState || item.countryRegion} (${
-                    item.confirmed
+                  primary={`${item.province || item.country} (${
+                    item.latest.confirmed
                   })`}
-                  secondary={`Deaths: ${item.deaths} Recovered: ${item.recovered}`}
+                  secondary={`Deaths: ${item.latest.deaths} Recovered: ${item.latest.recovered}`}
                 />
               </ListItem>
             ))}
@@ -163,22 +195,20 @@ export const CountryStatistics: FC<CountryStatisticsProps> = ({ data }) => {
     <div>
       <div>
         <span>
-          <Typography variant="h5">
-            {data.provinceState || data.countryRegion}
-          </Typography>
+          <Typography variant="h5">{data.province || data.country}</Typography>
         </span>
       </div>
       <div>
         <label>Confirmed</label>&nbsp;
-        <span>{data.confirmed}</span>
+        <span>{data.latest.confirmed}</span>
       </div>
       <div>
         <label>Deaths</label>&nbsp;
-        <span>{data.deaths}</span>
+        <span>{data.latest.deaths}</span>
       </div>
       <div>
         <label>Recovered</label>&nbsp;
-        <span>{data.recovered}</span>
+        <span>{data.latest.recovered}</span>
       </div>
     </div>
   )
