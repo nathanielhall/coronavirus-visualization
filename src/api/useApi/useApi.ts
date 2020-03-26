@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect } from 'react'
-import { reducer, initialState, Actions } from './reducer'
+import { reducer, initialState, Actions, StatusType } from './reducer'
 import { Method, Response, RequestError } from './types'
 import { client } from './client'
 
@@ -12,7 +12,7 @@ type UseApi<T> = [
     patch: Query
     put: Query
     delete: Query
-    loading: boolean
+    status: StatusType
     error: RequestError | undefined
     abort: () => void
   },
@@ -76,6 +76,6 @@ export const useApi: <T>(url?: string) => UseApi<T> = (url) => {
     httpClient.get(url)
   }, [url])
 
-  const { loading, error, ...other } = state
-  return [{ loading, error, ...httpClient }, other.response]
+  const { status, error, ...other } = state
+  return [{ status, error, ...httpClient }, other.response]
 }

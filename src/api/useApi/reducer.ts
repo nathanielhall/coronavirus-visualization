@@ -16,16 +16,18 @@ export const Actions = {
 
 export type Actions = ActionUnion<typeof Actions>
 
+export type StatusType = 'idle' | 'pending' | 'resolved' | 'rejected'
+
 // Reducer
 export type ApiState<T> = {
+  status: StatusType
   response?: Response<T>
-  loading: boolean
   error?: RequestError
 }
 
-export const initialState = {
+export const initialState: ApiState<any> = {
+  status: 'idle',
   response: undefined,
-  loading: false,
   error: undefined
 }
 
@@ -35,11 +37,11 @@ export const reducer: Reducer<ApiState<any>, Actions> = (
 ) => {
   switch (actions.type) {
     case FETCHING:
-      return { ...initialState, loading: true }
+      return { ...initialState, status: 'pending' }
     case SUCCESS:
-      return { ...state, loading: false, response: actions.payload }
+      return { ...state, status: 'resolved', response: actions.payload }
     case ERROR:
-      return { ...state, loading: false, error: actions.payload }
+      return { ...state, status: 'rejected', error: actions.payload }
     default:
       return state
   }
