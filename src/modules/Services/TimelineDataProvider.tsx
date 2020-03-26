@@ -22,9 +22,11 @@ type CountryStatistics = {
   timelines: { confirmed: { timeline: { [key: string]: number } } }
 }
 
-export const TimelineDataProvider: () => DataProvider<Statistic> = () => {
+export const TimelineDataProvider: (
+  countryCode?: string
+) => DataProvider<Statistic> = (countryCode = 'US') => {
   const [request, response] = useApi<CountryStatisticsApi>(
-    `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&timelines=1`
+    `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=${countryCode}&timelines=1`
   )
   const [data, setData] = useState<Statistic[]>()
 
