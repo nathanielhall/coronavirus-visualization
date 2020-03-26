@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useApi, StatusType, RequestError } from 'src/api'
+import { useApi } from 'src/api'
 import { format } from 'date-fns'
+import { DataProvider } from './types'
 
 export type Statistic = {
   key: string // formatted date
@@ -21,13 +22,7 @@ type CountryStatistics = {
   timelines: { confirmed: { timeline: { [key: string]: number } } }
 }
 
-type TimelineDataProviderType = () => [
-  StatusType,
-  Statistic[] | undefined,
-  RequestError | undefined
-]
-
-export const TimelineDataProvider: TimelineDataProviderType = () => {
+export const TimelineDataProvider: () => DataProvider<Statistic> = () => {
   const [request, response] = useApi<CountryStatisticsApi>(
     `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&timelines=1`
   )

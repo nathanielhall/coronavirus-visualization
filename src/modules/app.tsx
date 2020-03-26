@@ -1,9 +1,12 @@
 import React, { FC } from 'react'
 import { GrowthChart } from './GrowthChart'
+import { TimelineDataProvider } from './Services'
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
-  return <GrowthChart />
+  const dataProvider = TimelineDataProvider()
+
+  return <GrowthChart dataProvider={dataProvider} />
 }
 
 // <Select data={countries} />
