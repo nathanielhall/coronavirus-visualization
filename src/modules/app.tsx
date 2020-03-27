@@ -16,6 +16,15 @@ import {
 } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 
+// TODO:
+// - determine if graph can be small and inside drawer
+// - setup countries dropdown list
+// - load map when selected country
+// - Create drawer layout
+// - add statistics box in drawer
+// - move graph into drawer
+// - toggle button to control statistic types (confirmed, recovered, deaths/fatalities)
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
