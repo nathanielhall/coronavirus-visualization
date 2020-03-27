@@ -34,7 +34,7 @@ export const Statistics: FC<StatisticsProps> = ({
   const styles = useStyles()
 
   return (
-    <Box display={'flex'}>
+    <Box display={'flex'} textAlign={'center'}>
       <Box p={2} flex={'auto'}>
         <p className={styles.statLabel}>Confirmed</p>
         <p className={styles.statValue}>{confirmed}</p>

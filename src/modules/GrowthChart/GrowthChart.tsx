@@ -18,8 +18,8 @@ export const GrowthChart: FC<GrowthChartProps> = ({
       data={data}
       xAxisKey="key"
       yAxisKey="confirmed"
-      width={900}
-      height={450}
+      width={400}
+      height={225}
     />
   )
 }

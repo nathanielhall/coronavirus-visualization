@@ -20,6 +20,7 @@ import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 // - determine if graph can be small and inside drawer
 // - setup countries dropdown list
 // - load map when selected country
+// - pull appropriate data to load components
 // - Create drawer layout
 // - add statistics box in drawer
 // - move graph into drawer
@@ -63,13 +64,13 @@ export const App: FC<AppProps> = () => {
   return (
     <div className={classes.root}>
       <main className={classes.content}>
-        <Paper>
-          <Statistics confirmed={343} deaths={34} recovered={333} />
-          <GrowthChart dataProvider={timelineProvider} />
-        </Paper>
+        <Paper></Paper>
       </main>
 
-      <PermanentDrawer>Content to go here</PermanentDrawer>
+      <PermanentDrawer>
+        <Statistics confirmed={343} deaths={34} recovered={333} />
+        <GrowthChart dataProvider={timelineProvider} />
+      </PermanentDrawer>
     </div>
   )
 }

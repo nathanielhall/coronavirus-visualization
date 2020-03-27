@@ -4,7 +4,7 @@ import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import Divider from '@material-ui/core/Divider'
 
 // TODO: Determine if possible to use props here
-const drawerWidth = 300
+const drawerWidth = 425
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
