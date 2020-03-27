@@ -25,29 +25,36 @@ type CountryStatistics = {
 export const TimelineDataProvider: (
   countryCode?: string
 ) => DataProvider<Statistic> = (countryCode = 'US') => {
-  const [request, response] = useApi<CountryStatisticsApi>(
-    `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=${countryCode}&timelines=1`
-  )
+  const [request] = useApi<CountryStatisticsApi>()
   const [data, setData] = useState<Statistic[]>()
 
   useEffect(() => {
-    if (response && response.data) {
-      const { locations } = response.data
+    const getStatistics = async () => {
+      request
+        .get<CountryStatisticsApi>(
+          `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=${countryCode}&timelines=1`
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            const { locations } = response.data
 
-      if (!locations || locations.length <= 0) return
+            if (!locations || locations.length <= 0) return
+            const timeline = locations[0].timelines.confirmed.timeline
+            const confirmedCases: Statistic[] = Object.entries(timeline).map(
+              ([key, value]) => ({
+                key: format(new Date(key), 'MM-dd'),
+                confirmed: value,
+                type: 'confirmed'
+              })
+            )
 
-      const timeline = locations[0].timelines.confirmed.timeline
-      const confirmedCases: Statistic[] = Object.entries(timeline).map(
-        ([key, value]) => ({
-          key: format(new Date(key), 'MM-dd'),
-          confirmed: value,
-          type: 'confirmed'
+            setData(confirmedCases)
+          }
         })
-      )
-
-      setData(confirmedCases)
     }
-  }, [response])
+
+    getStatistics()
+  }, [])
 
   return [request.status, data, request.error]
 }

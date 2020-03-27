@@ -13,5 +13,13 @@ export const GrowthChart: FC<GrowthChartProps> = ({
   if (status === 'rejected') return <span>{error || 'ERROR'}</span>
   if (!data) return null
 
-  return <LineChart data={data} xAxisKey="key" yAxisKey="confirmed" />
+  return (
+    <LineChart
+      data={data}
+      xAxisKey="key"
+      yAxisKey="confirmed"
+      width={900}
+      height={450}
+    />
+  )
 }

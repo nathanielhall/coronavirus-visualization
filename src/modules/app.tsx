@@ -1,13 +1,98 @@
 import React, { FC } from 'react'
 import { GrowthChart } from './GrowthChart'
-import { TimelineDataProvider } from './Services'
+import {
+  TimelineDataProvider
+  // Country,
+  // CountriesDataProvider
+} from './Services'
+import { Statistics } from './Statistics'
+
+import { PermanentDrawer } from 'components/Drawer'
+import {
+  Paper
+  // List,
+  // ListItem,
+  // ListItemText
+} from '@material-ui/core'
+import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex'
+    },
+    toolbar: theme.mixins.toolbar,
+    content: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.default,
+      padding: theme.spacing(3),
+      marginLeft: '300px'
+    }
+  })
+)
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
-  const dataProvider = TimelineDataProvider()
+  const classes = useStyles()
+  const timelineProvider = TimelineDataProvider('US')
+  // const [
+  //   countriesRequestState,
+  //   countries,
+  //   countriesRequestError
+  // ] = CountriesDataProvider()
+  // const [selectedCountry, setSelectedCountry] = useState<Country | null>({
+  //   code: 'US',
+  //   name: 'US'
+  // })
 
-  return <GrowthChart dataProvider={dataProvider} />
+  // if (countriesRequestState === 'idle' || countriesRequestState === 'pending')
+  //   return <span>Loading...</span>
+
+  // if (countriesRequestState === 'rejected')
+  //   return <span>{countriesRequestError || 'ERROR'}</span>
+
+  return (
+    <div className={classes.root}>
+      <main className={classes.content}>
+        <Paper>
+          <Statistics confirmed={343} deaths={34} recovered={333} />
+          <GrowthChart dataProvider={timelineProvider} />
+        </Paper>
+      </main>
+
+      <PermanentDrawer>Content to go here</PermanentDrawer>
+    </div>
+  )
 }
+
+// import { Autocomplete } from 'components/Autocomplete'
+// import { Header } from 'components/Header'
+
+// <Header
+// title="Coronavirus Visualization"
+// handleDrawerOpen={handleDrawerOpen}
+// >
+// {countries && (
+//   <Autocomplete
+//     name="countries"
+//     data={countries}
+//     inputLabel={''}
+//     disableCloseOnSelect
+//     value={selectedCountry}
+//     onChange={(e, value) => {
+//       console.log(e.timeStamp) // FIXME: how to ignore parameter e??
+//       if (value) setSelectedCountry(value)
+//     }}
+//     getOptionLabel={(option: Country) => option.name}
+//     renderOption={(option: Country) => (
+//       <>
+//         <span>{option.code}</span>
+//         {option.name}
+//       </>
+//     )}
+//   />
+// )}
+// </Header>
 
 // <Select data={countries} />
 
@@ -128,37 +213,37 @@ export const App: FC<AppProps> = () => {
 //     })
 //   }, [statsResponse])
 
-//   const handleDrawerOpen = () => setOpenDrawer(true)
-//   const handleDrawerClose = () => setOpenDrawer(false)
+// const handleDrawerOpen = () => setOpenDrawer(true)
+// const handleDrawerClose = () => setOpenDrawer(false)
 
 //   // wait for countries before rendering map
 //   if (!countries) return null
 
 //   return (
 //     <React.Fragment>
-//       <Header
-//         title="Coronavirus Visualization"
-//         handleDrawerOpen={handleDrawerOpen}
-//       >
-//         <Autocomplete
-//           name="countries"
-//           data={countries}
-//           inputLabel={''}
-//           disableCloseOnSelect
-//           value={selectedCountry}
-//           onChange={(e, value) => {
-//             console.log(e) // FIXME: how to ignore parameter e??
-//             if (value) setSelectedCountry(value)
-//           }}
-//           getOptionLabel={(option: Country) => option.name}
-//           renderOption={(option: Country) => (
-//             <>
-//               <span>{option.code}</span>
-//               {option.name}
-//             </>
-//           )}
-//         />
-//       </Header>
+// <Header
+//   title="Coronavirus Visualization"
+//   handleDrawerOpen={handleDrawerOpen}
+// >
+//   <Autocomplete
+//     name="countries"
+//     data={countries}
+//     inputLabel={''}
+//     disableCloseOnSelect
+//     value={selectedCountry}
+//     onChange={(e, value) => {
+//       console.log(e) // FIXME: how to ignore parameter e??
+//       if (value) setSelectedCountry(value)
+//     }}
+//     getOptionLabel={(option: Country) => option.name}
+//     renderOption={(option: Country) => (
+//       <>
+//         <span>{option.code}</span>
+//         {option.name}
+//       </>
+//     )}
+//   />
+// </Header>
 
 //       <main>
 //         <Map center={mapDisplayProps.center} zoom={mapDisplayProps.zoom}>
@@ -180,22 +265,22 @@ export const App: FC<AppProps> = () => {
 //             ))}
 //         </Map>
 //       </main>
-//       <Drawer handleDrawerClose={handleDrawerClose} open={openDrawer}>
-//         <List>
-//           {statsResponse &&
-//             statsResponse.data &&
-//             statsResponse.data.locations.map((item, index) => (
-//               <ListItem button key={index} onClick={() => listItemClick(item)}>
-//                 <ListItemText
-//                   primary={`${item.province || item.country} (${
-//                     item.latest.confirmed
-//                   })`}
-//                   secondary={`Deaths: ${item.latest.deaths} Recovered: ${item.latest.recovered}`}
-//                 />
-//               </ListItem>
-//             ))}
-//         </List>
-//       </Drawer>
+// <Drawer handleDrawerClose={handleDrawerClose} open={openDrawer}>
+//   <List>
+//     {statsResponse &&
+//       statsResponse.data &&
+//       statsResponse.data.locations.map((item, index) => (
+//         <ListItem button key={index} onClick={() => listItemClick(item)}>
+//           <ListItemText
+//             primary={`${item.province || item.country} (${
+//               item.latest.confirmed
+//             })`}
+//             secondary={`Deaths: ${item.latest.deaths} Recovered: ${item.latest.recovered}`}
+//           />
+//         </ListItem>
+//       ))}
+//   </List>
+// </Drawer>
 //     </React.Fragment>
 //   )
 // }
