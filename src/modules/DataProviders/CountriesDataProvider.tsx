@@ -34,5 +34,5 @@ export const CountriesDataProvider: () => DataProvider<Country> = () => {
     getCountries()
   }, [])
 
-  return [request.status, data, request.error]
+  return [request.status, data, request.error, undefined]
 }

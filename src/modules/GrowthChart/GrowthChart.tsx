@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { LineChart } from 'components/LineChart'
-import { DataProvider, Statistic } from '../Services'
+import { DataProvider, Statistic } from '../DataProviders'
 
 export type GrowthChartProps = {
   dataProvider: DataProvider<Statistic>

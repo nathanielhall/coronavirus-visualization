@@ -1,21 +1,6 @@
 import React, { ReactElement, ChangeEvent } from 'react'
 import TextField from '@material-ui/core/TextField'
 import MuiAutocomplete from '@material-ui/lab/Autocomplete'
-import { makeStyles } from '@material-ui/core/styles'
-
-const useStyles = makeStyles({
-  option: {
-    fontSize: 15,
-    '& > span': {
-      marginRight: 10,
-      fontSize: 18
-    }
-  },
-  input: {
-    borderColor: '#fff',
-    color: '#fff'
-  }
-})
 
 export type AutocompleteProps<TData> = {
   name: string
@@ -43,16 +28,11 @@ export const Autocomplete: <TData>(
   value,
   onChange
 }) => {
-  const classes = useStyles()
-
   return (
     <MuiAutocomplete
       style={{ width: 300 }}
       options={data}
-      classes={{
-        option: classes.option,
-        input: classes.input
-      }}
+      size="small"
       disableCloseOnSelect={disableCloseOnSelect}
       autoHighlight
       getOptionLabel={getOptionLabel}
@@ -65,7 +45,7 @@ export const Autocomplete: <TData>(
           label={inputLabel}
           name={name}
           data-test-id={testId}
-          variant="outlined"
+          variant="standard"
           inputProps={{
             ...params.inputProps,
             autoComplete: 'new-password' // disable autocomplete and autofill

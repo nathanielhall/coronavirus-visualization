@@ -1,13 +1,16 @@
-import React, { FC } from 'react'
-import { GrowthChart } from './GrowthChart'
+import React, { FC, useState, useEffect } from 'react'
 import {
-  TimelineDataProvider
-  // Country,
-  // CountriesDataProvider
-} from './Services'
+  Country,
+  CountriesApi,
+  Statistic,
+  // CountryStatistics,
+  CountryStatisticsApi
+} from './types'
+import { useApi } from 'src/api'
 import { Statistics } from './Statistics'
-
+import { Autocomplete } from 'components/Autocomplete'
 import { PermanentDrawer } from 'components/Drawer'
+import { LineChart } from 'components/LineChart'
 import {
   Paper
   // List,
@@ -15,9 +18,10 @@ import {
   // ListItemText
 } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
+import { format } from 'date-fns'
 
 // TODO:
-// - determine if graph can be small and inside drawer
+
 // - setup countries dropdown list
 // - load map when selected country
 // - pull appropriate data to load components
@@ -44,22 +48,69 @@ const useStyles = makeStyles((theme: Theme) =>
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
   const classes = useStyles()
-  const timelineProvider = TimelineDataProvider('US')
-  // const [
-  //   countriesRequestState,
-  //   countries,
-  //   countriesRequestError
-  // ] = CountriesDataProvider()
-  // const [selectedCountry, setSelectedCountry] = useState<Country | null>({
-  //   code: 'US',
-  //   name: 'US'
-  // })
 
-  // if (countriesRequestState === 'idle' || countriesRequestState === 'pending')
-  //   return <span>Loading...</span>
+  // Countries
+  const [countriesReq] = useApi<CountriesApi>()
+  const [countries, setCountries] = useState<Country[]>()
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>({
+    code: 'US',
+    name: 'US'
+  })
 
-  // if (countriesRequestState === 'rejected')
-  //   return <span>{countriesRequestError || 'ERROR'}</span>
+  // Country Statistics
+  const [statsReq] = useApi<CountryStatisticsApi>()
+  const [statistics, setStatistics] = useState<Statistic[]>()
+
+  // Load contries when app loads
+  // TODO: cache?
+  useEffect(() => {
+    const getCountries = async () => {
+      countriesReq
+        .get<CountriesApi>('https://covid19.mathdro.id/api/countries')
+        .then((response) => {
+          if (response.status === 200) {
+            const allCountries: Country[] = response.data.countries.map(
+              (country) => ({ name: country.name, code: country.iso2 })
+            )
+
+            setCountries(allCountries)
+          }
+        })
+    }
+
+    getCountries()
+  }, [])
+
+  // Load statistics for selected country
+  useEffect(() => {
+    const getStatistics = async (code: string) => {
+      statsReq
+        .get<CountryStatisticsApi>(
+          `https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=${code}&timelines=1`
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            const { locations } = response.data
+
+            if (!locations || locations.length <= 0) return
+
+            // FIXME: pulling first item in array... review this!
+            const timeline = locations[0].timelines.confirmed.timeline
+            const confirmedCases: Statistic[] = Object.entries(timeline).map(
+              ([key, value]) => ({
+                key: format(new Date(key), 'MM-dd'),
+                confirmed: value,
+                type: 'confirmed'
+              })
+            )
+
+            setStatistics(confirmedCases)
+          }
+        })
+    }
+
+    if (selectedCountry) getStatistics(selectedCountry.code)
+  }, [selectedCountry])
 
   return (
     <div className={classes.root}>
@@ -68,8 +119,49 @@ export const App: FC<AppProps> = () => {
       </main>
 
       <PermanentDrawer>
+        {(countriesReq.status === 'idle' ||
+          countriesReq.status === 'pending') && <span>Loading...</span>}
+        {countriesReq.status === 'rejected' && (
+          <span>{countriesReq.error || 'ERROR'}</span>
+        )}
+        {countries && (
+          <Autocomplete
+            name="countries"
+            data={countries}
+            inputLabel={''}
+            disableCloseOnSelect
+            value={selectedCountry}
+            onChange={(e, value) => {
+              console.log(e.timeStamp) // FIXME: how to ignore parameter e??
+              if (value) setSelectedCountry(value)
+            }}
+            getOptionLabel={(option: Country) => option.name}
+            renderOption={(option: Country) => (
+              <>
+                <span>{option.code}</span>
+                {option.name}
+              </>
+            )}
+          />
+        )}
         <Statistics confirmed={343} deaths={34} recovered={333} />
-        <GrowthChart dataProvider={timelineProvider} />
+
+        {(statsReq.status === 'idle' || statsReq.status === 'pending') && (
+          <span>Loading...</span>
+        )}
+        {statsReq.status === 'rejected' && (
+          <span>{statsReq.error || 'ERROR'}</span>
+        )}
+
+        {statistics && (
+          <LineChart
+            data={statistics}
+            xAxisKey="key"
+            yAxisKey="confirmed"
+            width={400}
+            height={225}
+          />
+        )}
       </PermanentDrawer>
     </div>
   )
