@@ -12,7 +12,6 @@ import { Autocomplete } from 'components/Autocomplete'
 import { PermanentDrawer } from 'components/Drawer'
 import { LineChart } from 'components/LineChart'
 import {
-  Paper,
   Box
   // List,
   // ListItem,
