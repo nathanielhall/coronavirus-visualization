@@ -2,8 +2,8 @@ import React, { FC, useState, useEffect } from 'react'
 import {
   Country,
   CountriesApi,
-  Statistic,
-  // CountryStatistics,
+  CountryStatistics,
+  TimelineValue,
   CountryStatisticsApi
 } from './types'
 import { useApi } from 'src/api'
@@ -12,7 +12,8 @@ import { Autocomplete } from 'components/Autocomplete'
 import { PermanentDrawer } from 'components/Drawer'
 import { LineChart } from 'components/LineChart'
 import {
-  Paper
+  Paper,
+  Box
   // List,
   // ListItem,
   // ListItemText
@@ -59,7 +60,7 @@ export const App: FC<AppProps> = () => {
 
   // Country Statistics
   const [statsReq] = useApi<CountryStatisticsApi>()
-  const [statistics, setStatistics] = useState<Statistic[]>()
+  const [statistics, setStatistics] = useState<CountryStatistics>()
 
   // Load contries when app loads
   // TODO: cache?
@@ -94,73 +95,85 @@ export const App: FC<AppProps> = () => {
 
             if (!locations || locations.length <= 0) return
 
-            // FIXME: pulling first item in array... review this!
-            const timeline = locations[0].timelines.confirmed.timeline
-            const confirmedCases: Statistic[] = Object.entries(timeline).map(
-              ([key, value]) => ({
-                key: format(new Date(key), 'MM-dd'),
-                confirmed: value,
-                type: 'confirmed'
-              })
-            )
+            const { timelines, latest } = locations[0]
 
-            setStatistics(confirmedCases)
+            // FIXME: pulling first item in array... review this!
+            const timeline = timelines.confirmed.timeline
+            const confirmedCases: TimelineValue[] = Object.entries(
+              timeline
+            ).map(([key, value]) => ({
+              key: format(new Date(key), 'MM-dd'),
+              confirmed: value,
+              type: 'confirmed'
+            }))
+
+            const result: CountryStatistics = {
+              timelines: confirmedCases,
+              ...latest
+            }
+            setStatistics(result)
           }
         })
     }
 
-    if (selectedCountry) getStatistics(selectedCountry.code)
+    if (selectedCountry) {
+      console.log(selectedCountry, 'SELECTED')
+      getStatistics(selectedCountry.code)
+    } else {
+      console.log('Selected Country: ---', 'SELECTED')
+    }
   }, [selectedCountry])
 
   return (
     <div className={classes.root}>
-      <main className={classes.content}>
-        <Paper></Paper>
-      </main>
-
-      <PermanentDrawer>
-        {(countriesReq.status === 'idle' ||
-          countriesReq.status === 'pending') && <span>Loading...</span>}
-        {countriesReq.status === 'rejected' && (
-          <span>{countriesReq.error || 'ERROR'}</span>
-        )}
-        {countries && (
-          <Autocomplete
-            name="countries"
-            data={countries}
-            inputLabel={''}
-            disableCloseOnSelect
-            value={selectedCountry}
-            onChange={(e, value) => {
-              console.log(e.timeStamp) // FIXME: how to ignore parameter e??
-              if (value) setSelectedCountry(value)
-            }}
-            getOptionLabel={(option: Country) => option.name}
-            renderOption={(option: Country) => (
-              <>
-                <span>{option.code}</span>
-                {option.name}
-              </>
-            )}
-          />
-        )}
-        <Statistics confirmed={343} deaths={34} recovered={333} />
-
-        {(statsReq.status === 'idle' || statsReq.status === 'pending') && (
-          <span>Loading...</span>
-        )}
-        {statsReq.status === 'rejected' && (
-          <span>{statsReq.error || 'ERROR'}</span>
-        )}
+      <PermanentDrawer title={'Coronavirus Visualization'}>
+        <Box
+          display={'flex'}
+          justifyContent={'center'}
+          paddingTop={'16px'}
+          paddingBottom={'16px'}
+        >
+          {(countriesReq.status === 'idle' ||
+            countriesReq.status === 'pending') && <span>Loading...</span>}
+          {countriesReq.status === 'rejected' && (
+            <span>{countriesReq.error || 'ERROR'}</span>
+          )}
+          {countries && (
+            <Autocomplete
+              name="countries"
+              data={countries}
+              inputLabel={''}
+              value={selectedCountry}
+              onChange={(e, value) => {
+                console.log(e.timeStamp) // FIXME: how to ignore parameter e??
+                if (value) setSelectedCountry(value)
+              }}
+              getOptionLabel={(option: Country) => option.name}
+              renderOption={(option: Country) => (
+                <>
+                  <span>{option.code}</span>
+                  {option.name}
+                </>
+              )}
+            />
+          )}
+        </Box>
 
         {statistics && (
-          <LineChart
-            data={statistics}
-            xAxisKey="key"
-            yAxisKey="confirmed"
-            width={400}
-            height={225}
-          />
+          <>
+            <Statistics
+              confirmed={statistics.confirmed}
+              deaths={statistics.deaths}
+              recovered={statistics.recovered}
+            />
+            <LineChart
+              data={statistics.timelines}
+              xAxisKey="key"
+              yAxisKey="confirmed"
+              width={400}
+              height={225}
+            />
+          </>
         )}
       </PermanentDrawer>
     </div>

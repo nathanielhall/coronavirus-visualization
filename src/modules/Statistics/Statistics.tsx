@@ -37,15 +37,15 @@ export const Statistics: FC<StatisticsProps> = ({
     <Box display={'flex'} textAlign={'center'}>
       <Box p={2} flex={'auto'}>
         <p className={styles.statLabel}>Confirmed</p>
-        <p className={styles.statValue}>{confirmed}</p>
+        <p className={styles.statValue}>{confirmed.toLocaleString()}</p>
       </Box>
       <Box p={2} flex={'auto'}>
         <p className={styles.statLabel}>Deaths</p>
-        <p className={styles.statValue}>{deaths}</p>
+        <p className={styles.statValue}>{deaths.toLocaleString()}</p>
       </Box>
       <Box p={2} flex={'auto'}>
         <p className={styles.statLabel}>Recovered</p>
-        <p className={styles.statValue}>{recovered}</p>
+        <p className={styles.statValue}>{recovered.toLocaleString()}</p>
       </Box>
     </Box>
   )

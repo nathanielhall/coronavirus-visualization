@@ -1,6 +1,7 @@
 import React, { ReactElement, ChangeEvent } from 'react'
 import TextField from '@material-ui/core/TextField'
 import MuiAutocomplete from '@material-ui/lab/Autocomplete'
+import { makeStyles } from '@material-ui/core/styles'
 
 export type AutocompleteProps<TData> = {
   name: string
@@ -14,6 +15,19 @@ export type AutocompleteProps<TData> = {
   onChange: (event: ChangeEvent<{}>, value: TData | null) => void
   //style?: React.CSSProperties;
 }
+const useStyles = makeStyles({
+  option: {
+    fontSize: 15,
+    '& > span': {
+      marginRight: 10,
+      fontSize: 18
+    }
+  },
+  input: {
+    // borderColor: '#fff',
+    // color: '#fff'
+  }
+})
 
 export const Autocomplete: <TData>(
   props: AutocompleteProps<TData>
@@ -28,10 +42,16 @@ export const Autocomplete: <TData>(
   value,
   onChange
 }) => {
+  const classes = useStyles()
+
   return (
     <MuiAutocomplete
       style={{ width: 300 }}
       options={data}
+      classes={{
+        option: classes.option,
+        input: classes.input
+      }}
       size="small"
       disableCloseOnSelect={disableCloseOnSelect}
       autoHighlight
