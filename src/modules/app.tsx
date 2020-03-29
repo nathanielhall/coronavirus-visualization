@@ -19,6 +19,7 @@ import {
 } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { format } from 'date-fns'
+import { Map, MapMarker } from 'components/Map'
 
 // TODO:
 
@@ -30,17 +31,16 @@ import { format } from 'date-fns'
 // - move graph into drawer
 // - toggle button to control statistic types (confirmed, recovered, deaths/fatalities)
 
+const drawerWidth = 425
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      display: 'flex'
-    },
     toolbar: theme.mixins.toolbar,
     content: {
       flexGrow: 1,
       backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(3),
-      marginLeft: '300px'
+      padding: theme.spacing(1),
+      marginLeft: `${drawerWidth}px`
     }
   })
 )
@@ -60,6 +60,10 @@ export const App: FC<AppProps> = () => {
   // Country Statistics
   const [statsReq] = useApi<CountryStatisticsApi>()
   const [statistics, setStatistics] = useState<CountryStatistics>()
+
+  const [statesRequest, statesResponse] = useApi<CountryStatisticsApi>(
+    'https://coronavirus-tracker-api.herokuapp.com/v2/locations?source=csbs'
+  )
 
   // Load contries when app loads
   // TODO: cache?
@@ -116,16 +120,40 @@ export const App: FC<AppProps> = () => {
     }
 
     if (selectedCountry) {
-      console.log(selectedCountry, 'SELECTED')
       getStatistics(selectedCountry.code)
-    } else {
-      console.log('Selected Country: ---', 'SELECTED')
     }
   }, [selectedCountry])
 
   return (
-    <div className={classes.root}>
-      <PermanentDrawer title={'Coronavirus Visualization'}>
+    <div>
+      <main className={classes.content}>
+        <Map center={[38.7, -77.48]} zoom={6}>
+          {statesRequest.status === 'resolved' &&
+            statesResponse &&
+            statesResponse.data.locations
+              .filter((x) => x.province === 'Virginia')
+              .map((stat, index) => (
+                <MapMarker
+                  id={index}
+                  key={index}
+                  onClose={() => console.log('closed')}
+                  position={[
+                    stat.coordinates.latitude,
+                    stat.coordinates.longitude
+                  ]}
+                >
+                  <Statistics
+                    title={`${stat.province || ''} - ${stat.county ||
+                      ''} County`}
+                    confirmed={stat.latest.confirmed}
+                    deaths={stat.latest.deaths}
+                    recovered={stat.latest.recovered}
+                  />
+                </MapMarker>
+              ))}
+        </Map>
+      </main>
+      <PermanentDrawer title={'Coronavirus Visualization'} width={drawerWidth}>
         <Box
           display={'flex'}
           justifyContent={'center'}
@@ -179,6 +207,34 @@ export const App: FC<AppProps> = () => {
   )
 }
 
+// export type CountryStatisticsProps = {
+//   data: CountryData
+// }
+// export const CountryStatistics: FC<CountryStatisticsProps> = ({ data }) => {
+//   return (
+//     <div>
+//       <div>
+//         <span>
+//           <Typography variant="h5">
+//             {data.provinceState || data.countryRegion}
+//           </Typography>
+//         </span>
+//       </div>
+//       <div>
+//         <label>Confirmed</label>&nbsp;
+//         <span>{data.confirmed}</span>
+//       </div>
+//       <div>
+//         <label>Deaths</label>&nbsp;
+//         <span>{data.deaths}</span>
+//       </div>
+//       <div>
+//         <label>Recovered</label>&nbsp;
+//         <span>{data.recovered}</span>
+//       </div>
+//     </div>
+//   )
+// }
 // import { Autocomplete } from 'components/Autocomplete'
 // import { Header } from 'components/Header'
 

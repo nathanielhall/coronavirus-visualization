@@ -3,8 +3,12 @@ import MuiDrawer from '@material-ui/core/Drawer'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import Divider from '@material-ui/core/Divider'
 import { Typography } from '@material-ui/core'
-// TODO: Determine if possible to use props here
-const drawerWidth = 425
+
+type PermanentDrawerProps = {
+  children: ReactNode
+  title?: string
+  width?: number
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -12,15 +16,16 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex'
     },
     appBar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth
+      width: (props: PermanentDrawerProps) =>
+        `calc(100% - ${props.width || 425}px)`,
+      marginLeft: (props: PermanentDrawerProps) => props.width || 425
     },
     drawer: {
-      width: drawerWidth,
+      width: (props: PermanentDrawerProps) => props.width || 425,
       flexShrink: 0
     },
     drawerPaper: {
-      width: drawerWidth
+      width: (props: PermanentDrawerProps) => props.width || 425
     },
     toolbar: theme.mixins.toolbar,
     content: {
@@ -31,15 +36,8 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-type PermanentDrawerProps = {
-  children: ReactNode
-  title?: string
-}
-export const PermanentDrawer: FC<PermanentDrawerProps> = ({
-  children,
-  title
-}) => {
-  const classes = useStyles()
+export const PermanentDrawer: FC<PermanentDrawerProps> = (props) => {
+  const classes = useStyles(props)
 
   return (
     <MuiDrawer
@@ -55,12 +53,12 @@ export const PermanentDrawer: FC<PermanentDrawerProps> = ({
           style={{ paddingLeft: '10px', paddingTop: '15px' }}
           variant="h6"
         >
-          {title || ''}
+          {props.title || ''}
         </Typography>
       </div>
 
       <Divider />
-      {children}
+      {props.children}
     </MuiDrawer>
   )
 }

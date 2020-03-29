@@ -24,10 +24,11 @@ export type CountryStatisticsApi = {
     coordinates: { latitude: number; longitude: number }
     country: string
     country_code: string
+    province?: string
+    county?: string
     id: number
     last_updated: Date
     latest: { confirmed: number; deaths: number; recovered: number }
-    province: string
     timelines: { confirmed: { timeline: { [key: string]: number } } }
   }[]
 }

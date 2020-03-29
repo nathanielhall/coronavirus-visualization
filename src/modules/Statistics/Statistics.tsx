@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { Box } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { grey } from '@material-ui/core/colors'
 
@@ -21,12 +21,14 @@ const useStyles = makeStyles({
 })
 
 export type StatisticsProps = {
+  title?: string
   confirmed: number
   deaths: number
   recovered: number
 }
 
 export const Statistics: FC<StatisticsProps> = ({
+  title,
   confirmed,
   deaths,
   recovered
@@ -34,19 +36,22 @@ export const Statistics: FC<StatisticsProps> = ({
   const styles = useStyles()
 
   return (
-    <Box display={'flex'} textAlign={'center'}>
-      <Box p={2} flex={'auto'}>
-        <p className={styles.statLabel}>Confirmed</p>
-        <p className={styles.statValue}>{confirmed.toLocaleString()}</p>
+    <>
+      {title && <Typography variant="h6">{title}</Typography>}
+      <Box display={'flex'} textAlign={'center'}>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Confirmed</p>
+          <p className={styles.statValue}>{confirmed.toLocaleString()}</p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Deaths</p>
+          <p className={styles.statValue}>{deaths.toLocaleString()}</p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Recovered</p>
+          <p className={styles.statValue}>{recovered.toLocaleString()}</p>
+        </Box>
       </Box>
-      <Box p={2} flex={'auto'}>
-        <p className={styles.statLabel}>Deaths</p>
-        <p className={styles.statValue}>{deaths.toLocaleString()}</p>
-      </Box>
-      <Box p={2} flex={'auto'}>
-        <p className={styles.statLabel}>Recovered</p>
-        <p className={styles.statValue}>{recovered.toLocaleString()}</p>
-      </Box>
-    </Box>
+    </>
   )
 }
