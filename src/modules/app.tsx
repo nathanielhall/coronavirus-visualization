@@ -1,6 +1,5 @@
 import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
-// import { Autocomplete } from 'components/Autocomplete'
 import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
 import { useApi } from 'src/api'
@@ -12,29 +11,6 @@ import {
   Box
 } from '@material-ui/core'
 import { format } from 'date-fns'
-
-// type Country = {
-//   name: string
-//   code: string
-// }
-// type CountriesApi = {
-//   [key: string]: string
-// }
-// type CountryData = {
-//   provinceState: string
-//   countryRegion: string
-//   lastUpdate: number
-//   lat: number
-//   long: number
-//   confirmed: number
-//   recovered: number
-//   deaths: number
-//   active: number
-// }
-// type MapDisplayProps = {
-//   center: [number, number]
-//   zoom: number
-// }
 
 type LocationCount = {
   confirmed: number
@@ -54,9 +30,9 @@ type Location = {
   latest: LocationCount
 }
 
-// type CountryApi = {
-//   location: Location
-// }
+type CountryApi = {
+  location: Location
+}
 
 type LocationsApi = {
   latest: LocationCount
@@ -90,9 +66,9 @@ export const App: FC<AppProps> = () => {
   //   zoom: 4
   // })
 
-  // const [, countryResponse] = useApi<CountryApi>(
-  //   'https://coronavirus-tracker-api.herokuapp.com/v2/locations/225'
-  // )
+  const [, countryResponse] = useApi<CountryApi>(
+    'https://coronavirus-tracker-api.herokuapp.com/v2/locations/225'
+  )
 
   const [locationsRequest, locationsResponse] = useApi<LocationsApi>(
     'https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&source=csbs'
@@ -145,17 +121,6 @@ export const App: FC<AppProps> = () => {
     setSelectedProvince(selected)
   }, [locationsResponse])
 
-  // when country statistics are retrieved move the center position and zoom
-  // useEffect(() => {
-  //   setMapDisplayProps({
-  //     center:
-  //       statsResponse && statsResponse.data.length > 0
-  //         ? [statsResponse.data[0].lat, statsResponse.data[0].long]
-  //         : [40.4, -95.7],
-  //     zoom: 4
-  //   })
-  // }, [statsResponse])
-
   const listItemClick = (item: Province) => {
     setSelectedProvince(item)
   }
@@ -169,9 +134,13 @@ export const App: FC<AppProps> = () => {
   return (
     <>
       <Header
-        title="Coronavirus Visualization (US Only)"
+        title="US Coronavirus (COVID-19) Visualization"
         handleDrawerOpen={handleDrawerOpen}
-      ></Header>
+      >
+        {countryResponse && (
+          <HeaderStatistics data={countryResponse.data.location} />
+        )}
+      </Header>
 
       <main>
         <Map
@@ -197,7 +166,7 @@ export const App: FC<AppProps> = () => {
                     loc.coordinates.longitude
                   ]}
                 >
-                  <Statistics data={loc} />
+                  <MapPopupStatistics data={loc} />
                 </MapMarker>
               ))}
         </Map>
@@ -226,7 +195,7 @@ export const App: FC<AppProps> = () => {
   )
 }
 
-export type StatisticsProps = {
+export type MapPopupStatisticsProps = {
   data: Location
 }
 
@@ -250,7 +219,7 @@ const useStyles = makeStyles({
   }
 })
 
-export const Statistics: FC<StatisticsProps> = ({ data }) => {
+export const MapPopupStatistics: FC<MapPopupStatisticsProps> = ({ data }) => {
   const styles = useStyles()
   return (
     <div>
@@ -284,5 +253,35 @@ export const Statistics: FC<StatisticsProps> = ({ data }) => {
         {format(new Date(data.last_updated), 'MM/dd/yyyy hh:mm')}
       </p>
     </div>
+  )
+}
+
+type HeaderStatisticsProps = {
+  data: Location
+}
+const HeaderStatistics: FC<HeaderStatisticsProps> = ({ data }) => {
+  const styles = useStyles()
+
+  return (
+    <Box display={'flex'} textAlign={'center'}>
+      <Box p={2} flex={'auto'}>
+        <label className={styles.statLabel}>Confirmed</label>
+        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
+          {data.latest.confirmed.toLocaleString()}
+        </span>
+      </Box>
+      <Box p={2} flex={'auto'}>
+        <label className={styles.statLabel}>Deaths</label>
+        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
+          {data.latest.deaths.toLocaleString()}
+        </span>
+      </Box>
+      <Box p={2} flex={'auto'}>
+        <label className={styles.statLabel}>Recovered</label>
+        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
+          {data.latest.recovered.toLocaleString()}
+        </span>
+      </Box>
+    </Box>
   )
 }
