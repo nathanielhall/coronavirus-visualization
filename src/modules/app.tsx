@@ -4,7 +4,15 @@ import { Map, MapMarker } from 'components/Map'
 import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
 import { useApi } from 'src/api'
-import { List, ListItem, ListItemText } from '@material-ui/core'
+import {
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Box
+} from '@material-ui/core'
+import { format } from 'date-fns'
+
 // type Country = {
 //   name: string
 //   code: string
@@ -161,7 +169,7 @@ export const App: FC<AppProps> = () => {
   return (
     <>
       <Header
-        title="Coronavirus Visualization"
+        title="Coronavirus Visualization (US Only)"
         handleDrawerOpen={handleDrawerOpen}
       ></Header>
 
@@ -172,7 +180,7 @@ export const App: FC<AppProps> = () => {
               ? [selectedProvince.latitude, selectedProvince.longitude]
               : [40.4, -125.7]
           }
-          zoom={5}
+          zoom={6}
         >
           {locationsRequest.loading === false &&
             locationsResponse &&
@@ -189,7 +197,7 @@ export const App: FC<AppProps> = () => {
                     loc.coordinates.longitude
                   ]}
                 >
-                  <span>popup</span>
+                  <Statistics data={loc} />
                 </MapMarker>
               ))}
         </Map>
@@ -198,7 +206,14 @@ export const App: FC<AppProps> = () => {
         <List>
           {provinces &&
             provinces.map((item, index) => (
-              <ListItem button key={index} onClick={() => listItemClick(item)}>
+              <ListItem
+                button
+                selected={
+                  selectedProvince && item.name === selectedProvince.name
+                }
+                key={index}
+                onClick={() => listItemClick(item)}
+              >
                 <ListItemText
                   primary={`${item.name} (${item.latest.confirmed})`}
                   secondary={`Deaths: ${item.latest.deaths} Recovered: ${item.latest.recovered}`}
@@ -208,5 +223,66 @@ export const App: FC<AppProps> = () => {
         </List>
       </Drawer>
     </>
+  )
+}
+
+export type StatisticsProps = {
+  data: Location
+}
+
+import { makeStyles } from '@material-ui/styles'
+import { grey } from '@material-ui/core/colors'
+
+const useStyles = makeStyles({
+  statLabel: {
+    fontSize: 12,
+    color: grey[500],
+    fontWeight: 500,
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+    margin: 0
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    letterSpacing: '1px'
+  }
+})
+
+export const Statistics: FC<StatisticsProps> = ({ data }) => {
+  const styles = useStyles()
+  return (
+    <div>
+      <Box>
+        <Typography variant="h6">
+          {`${data.province} -  ${data.county} County`}
+        </Typography>
+      </Box>
+      <Box display={'flex'} textAlign={'center'}>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Confirmed</p>
+          <p className={styles.statValue}>
+            {data.latest.confirmed.toLocaleString()}
+          </p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Deaths</p>
+          <p className={styles.statValue}>
+            {data.latest.deaths.toLocaleString()}
+          </p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Recovered</p>
+          <p className={styles.statValue}>
+            {data.latest.recovered.toLocaleString()}
+          </p>
+        </Box>
+      </Box>
+
+      <p className={styles.statLabel}>
+        {format(new Date(data.last_updated), 'MM/dd/yyyy hh:mm')}
+      </p>
+    </div>
   )
 }
