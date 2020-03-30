@@ -49,38 +49,17 @@ type Province = {
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
-  // const [countriesRequest] = useApi<CountriesApi>()
-  // const [countries, setCountries] = useState<Country[]>()
-  // const [selectedCountry, setSelectedCountry] = useState<Country | null>({
-  //   code: 'US',
-  //   name: 'US'
-  // })
-  // const [statsRequest, statsResponse] = useApi<CountryData[]>(
-  //   selectedCountry
-  //     ? `https://covid19.mathdro.id/api/countries/${selectedCountry.code}/confirmed`
-  //     : undefined
-  // )
-  // const [openDrawer, setOpenDrawer] = useState<boolean>(false)
-  // const [mapDisplayProps, setMapDisplayProps] = useState<MapDisplayProps>({
-  //   center: [40.4, -125.7],
-  //   zoom: 4
-  // })
-
   const [, countryResponse] = useApi<CountryApi>(
     'https://coronavirus-tracker-api.herokuapp.com/v2/locations/225'
   )
-
   const [locationsRequest, locationsResponse] = useApi<LocationsApi>(
     'https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&source=csbs'
   )
-
   const [provinces, setProvinces] = useState<Province[] | undefined>()
-
-  // selectedLocation
   const [selectedProvince, setSelectedProvince] = useState<
     Province | undefined
   >()
-  const [openDrawer, setOpenDrawer] = useState<boolean>(false)
+  const [openDrawer, setOpenDrawer] = useState<boolean>(true)
 
   // When app first loads, retrieve countries and format data
   useEffect(() => {
