@@ -57,6 +57,8 @@ type LocationsApi = {
 
 type Province = {
   name: string
+  latitude: number
+  longitude: number
   latest: LocationCount
   // lat / long
 }
@@ -111,6 +113,8 @@ export const App: FC<AppProps> = () => {
       } else {
         const newItem: Province = {
           name: curr.province,
+          latitude: curr.coordinates.latitude,
+          longitude: curr.coordinates.longitude,
           latest: {
             confirmed: curr.latest.confirmed,
             deaths: curr.latest.deaths,
@@ -162,7 +166,14 @@ export const App: FC<AppProps> = () => {
       ></Header>
 
       <main>
-        <Map center={[40.4, -125.7]} zoom={4}>
+        <Map
+          center={
+            selectedProvince
+              ? [selectedProvince.latitude, selectedProvince.longitude]
+              : [40.4, -125.7]
+          }
+          zoom={5}
+        >
           {locationsRequest.loading === false &&
             locationsResponse &&
             selectedProvince &&
