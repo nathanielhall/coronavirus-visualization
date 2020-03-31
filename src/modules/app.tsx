@@ -44,8 +44,10 @@ type Province = {
   latitude: number
   longitude: number
   latest: LocationCount
-  // lat / long
 }
+
+// FIXME: Find an API that can deliver results by state
+// FIXME: Remove accumulation of totals and use new Api  / this has potential for bugs
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
@@ -61,14 +63,15 @@ export const App: FC<AppProps> = () => {
   >()
   const [openDrawer, setOpenDrawer] = useState<boolean>(true)
 
-  // When app first loads, retrieve countries and format data
   useEffect(() => {
     if (!locationsResponse) return
 
     const { locations } = locationsResponse.data
 
     const result = locations.reduce((acc: Province[], curr) => {
+      if (curr.province === '') return acc
       const item = acc.find((x) => x.name === curr.province)
+
       if (item) {
         item.latest.confirmed += curr.latest.confirmed
         item.latest.deaths += curr.latest.deaths
@@ -106,9 +109,6 @@ export const App: FC<AppProps> = () => {
 
   const handleDrawerOpen = () => setOpenDrawer(true)
   const handleDrawerClose = () => setOpenDrawer(false)
-
-  // wait for countries before rendering map
-  if (!locationsResponse) return null
 
   return (
     <>
