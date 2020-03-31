@@ -2,49 +2,24 @@ import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
 import { Header } from 'components/Header'
 import { Drawer } from 'components/Drawer'
+import { GrowthChart } from './GrowthChart'
 import { useApi } from 'src/api'
 import {
   List,
   ListItem,
   ListItemText,
   Typography,
-  Box
+  Box,
+  Button
 } from '@material-ui/core'
 import { format } from 'date-fns'
-
-type LocationCount = {
-  confirmed: number
-  deaths: number
-  recovered: number
-}
-
-type Location = {
-  id: number
-  country: string
-  country_code: string
-  country_population: number
-  province: string
-  county: string
-  last_updated: Date
-  coordinates: { latitude: number; longitude: number }
-  latest: LocationCount
-}
-
-type CountryApi = {
-  location: Location
-}
-
-type LocationsApi = {
-  latest: LocationCount
-  locations: Location[]
-}
-
-type Province = {
-  name: string
-  latitude: number
-  longitude: number
-  latest: LocationCount
-}
+import {
+  // LocationCount,
+  Location,
+  CountryApi,
+  LocationsApi,
+  Province
+} from './types'
 
 // FIXME: Find an API that can deliver results by state
 // FIXME: Remove accumulation of totals and use new Api  / this has potential for bugs
@@ -62,6 +37,7 @@ export const App: FC<AppProps> = () => {
     Province | undefined
   >()
   const [openDrawer, setOpenDrawer] = useState<boolean>(true)
+  const [showTrendDialog, setShowTrendDialog] = useState(false)
 
   useEffect(() => {
     if (!locationsResponse) return
@@ -119,6 +95,9 @@ export const App: FC<AppProps> = () => {
         {countryResponse && (
           <HeaderStatistics data={countryResponse.data.location} />
         )}
+        <Button color="inherit" onClick={() => setShowTrendDialog(true)}>
+          Spread
+        </Button>
       </Header>
 
       <main>
@@ -170,6 +149,12 @@ export const App: FC<AppProps> = () => {
             ))}
         </List>
       </Drawer>
+      {showTrendDialog && countryResponse && (
+        <GrowthChart
+          onClose={() => setShowTrendDialog(false)}
+          data={countryResponse.data.location}
+        />
+      )}
     </>
   )
 }
