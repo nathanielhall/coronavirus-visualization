@@ -40,7 +40,7 @@ export const GrowthChart: FC<GrowthChartProps> = ({ onClose, data }) => {
     <Dialog open>
       <DialogContent>
         <DialogContentText>
-          Coronavirus (COVID-19) spread over time
+          Coronavirus (COVID-19) spread over time in US
         </DialogContentText>
         <LineChart
           data={statistics}
