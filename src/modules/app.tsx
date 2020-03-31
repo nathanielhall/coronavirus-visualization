@@ -244,21 +244,15 @@ const HeaderStatistics: FC<HeaderStatisticsProps> = ({ data }) => {
   return (
     <Box display={'flex'} textAlign={'center'}>
       <Box p={2} flex={'auto'}>
-        <label className={styles.statLabel}>Confirmed</label>
+        <label className={styles.statLabel}>Total Confirmed (US)</label>
         <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
           {data.latest.confirmed.toLocaleString()}
         </span>
       </Box>
       <Box p={2} flex={'auto'}>
-        <label className={styles.statLabel}>Deaths</label>
+        <label className={styles.statLabel}>Total Fatalities (US)</label>
         <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
           {data.latest.deaths.toLocaleString()}
-        </span>
-      </Box>
-      <Box p={2} flex={'auto'}>
-        <label className={styles.statLabel}>Recovered</label>
-        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
-          {data.latest.recovered.toLocaleString()}
         </span>
       </Box>
     </Box>
