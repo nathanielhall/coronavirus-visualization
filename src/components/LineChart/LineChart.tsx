@@ -16,7 +16,7 @@ export type LineChartProps<TData> = {
 export const LineChart: <TData>(
   props: LineChartProps<TData>
 ) => ReactElement<LineChartProps<TData>> = ({ data, xAxisKey, yAxisKey }) => (
-  <ResponsiveContainer width={'100%'} aspect={4.0 / 1.0}>
+  <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
     <RCLineChart data={data as any[]}>
       <Line type="monotone" dataKey={yAxisKey.toString()} stroke="#8884d8" />
       <CartesianGrid stroke="#ccc" />
