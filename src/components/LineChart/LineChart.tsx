@@ -4,30 +4,24 @@ import {
   Line,
   CartesianGrid,
   XAxis,
-  YAxis
+  YAxis,
+  ResponsiveContainer
 } from 'recharts'
-
 export type LineChartProps<TData> = {
   data: TData[]
   xAxisKey: keyof TData
   yAxisKey: keyof TData
-  width?: number
-  height?: number
 }
 
 export const LineChart: <TData>(
   props: LineChartProps<TData>
-) => ReactElement<LineChartProps<TData>> = ({
-  data,
-  xAxisKey,
-  yAxisKey,
-  width = 900,
-  height = 450
-}) => (
-  <RCLineChart width={width} height={height} data={data as any[]}>
-    <Line type="monotone" dataKey={yAxisKey.toString()} stroke="#8884d8" />
-    <CartesianGrid stroke="#ccc" />
-    <XAxis dataKey={xAxisKey.toString()} />
-    <YAxis />
-  </RCLineChart>
+) => ReactElement<LineChartProps<TData>> = ({ data, xAxisKey, yAxisKey }) => (
+  <ResponsiveContainer width={'100%'} aspect={4.0 / 1.0}>
+    <RCLineChart data={data as any[]}>
+      <Line type="monotone" dataKey={yAxisKey.toString()} stroke="#8884d8" />
+      <CartesianGrid stroke="#ccc" />
+      <XAxis dataKey={xAxisKey.toString()} />
+      <YAxis />
+    </RCLineChart>
+  </ResponsiveContainer>
 )

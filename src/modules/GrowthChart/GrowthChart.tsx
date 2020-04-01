@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Location, TimelineValue } from '../types'
 import {
+  makeStyles,
   Dialog,
   DialogContent,
   DialogContentText,
@@ -14,8 +15,17 @@ export type GrowthChartProps = {
   data: Location
 }
 
+const useStyles = makeStyles({
+  dialogPaper: {
+    minHeight: '90vh',
+    maxHeight: '90vh'
+  }
+})
+
 export const GrowthChart: FC<GrowthChartProps> = ({ onClose, data }) => {
   const [statistics, setStatistics] = useState<TimelineValue[]>([])
+
+  const classes = useStyles()
 
   useEffect(() => {
     const {
@@ -37,18 +47,17 @@ export const GrowthChart: FC<GrowthChartProps> = ({ onClose, data }) => {
     setStatistics(confirmedCases)
   }, [])
   return (
-    <Dialog open>
+    <Dialog
+      open
+      maxWidth="lg"
+      fullWidth
+      classes={{ paper: classes.dialogPaper }}
+    >
       <DialogContent>
         <DialogContentText>
           Coronavirus (COVID-19) spread over time in US
         </DialogContentText>
-        <LineChart
-          data={statistics}
-          xAxisKey="key"
-          yAxisKey="confirmed"
-          width={400}
-          height={225}
-        />
+        <LineChart data={statistics} xAxisKey="key" yAxisKey="confirmed" />
       </DialogContent>
       <DialogActions>
         <Button color="primary" onClick={onClose}>
