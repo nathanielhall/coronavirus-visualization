@@ -1,31 +1,34 @@
 import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
 import { Header } from 'components/Header'
-import { Drawer } from 'components/Drawer'
+import { PermanentDrawer } from 'components/Drawer'
 import { GrowthChart } from './GrowthChart'
 import { useApi } from 'src/api'
-import {
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-  Box,
-  Button
-} from '@material-ui/core'
-import { format } from 'date-fns'
-import {
-  // LocationCount,
-  Location,
-  CountryApi,
-  LocationsApi,
-  Province
-} from './types'
+import { List, ListItem, ListItemText, Button } from '@material-ui/core'
+import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
+import { CountryApi, LocationsApi, Province } from './types'
+import { CountryStatistics, ProvinceStatistics } from './Statistics'
 
 // FIXME: Find an API that can deliver results by state
 // FIXME: Remove accumulation of totals and use new Api  / this has potential for bugs
 
+const drawerWidth = 425
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    toolbar: theme.mixins.toolbar,
+    content: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.default,
+      padding: theme.spacing(1),
+      marginLeft: `${drawerWidth}px`
+    }
+  })
+)
+
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
+  const classes = useStyles()
   const [, countryResponse] = useApi<CountryApi>(
     'https://coronavirus-tracker-api.herokuapp.com/v2/locations/225'
   )
@@ -36,7 +39,6 @@ export const App: FC<AppProps> = () => {
   const [selectedProvince, setSelectedProvince] = useState<
     Province | undefined
   >()
-  const [openDrawer, setOpenDrawer] = useState<boolean>(true)
   const [showTrendDialog, setShowTrendDialog] = useState(false)
 
   useEffect(() => {
@@ -83,24 +85,18 @@ export const App: FC<AppProps> = () => {
     setSelectedProvince(item)
   }
 
-  const handleDrawerOpen = () => setOpenDrawer(true)
-  const handleDrawerClose = () => setOpenDrawer(false)
-
   return (
     <>
-      <Header
-        title="US Coronavirus (COVID-19) Visualization"
-        handleDrawerOpen={handleDrawerOpen}
-      >
+      <Header title="US Coronavirus (COVID-19) Visualization">
         {countryResponse && (
-          <HeaderStatistics data={countryResponse.data.location} />
+          <CountryStatistics data={countryResponse.data.location} />
         )}
         <Button color="inherit" onClick={() => setShowTrendDialog(true)}>
           Spread
         </Button>
       </Header>
 
-      <main>
+      <main className={classes.content}>
         <Map
           center={
             selectedProvince
@@ -124,12 +120,13 @@ export const App: FC<AppProps> = () => {
                     loc.coordinates.longitude
                   ]}
                 >
-                  <MapPopupStatistics data={loc} />
+                  <ProvinceStatistics data={loc} />
                 </MapMarker>
               ))}
         </Map>
       </main>
-      <Drawer handleDrawerClose={handleDrawerClose} open={openDrawer}>
+
+      <PermanentDrawer title={'Coronavirus Visualization'} width={drawerWidth}>
         <List>
           {provinces &&
             provinces.map((item, index) => (
@@ -148,7 +145,8 @@ export const App: FC<AppProps> = () => {
               </ListItem>
             ))}
         </List>
-      </Drawer>
+      </PermanentDrawer>
+
       {showTrendDialog && countryResponse && (
         <GrowthChart
           onClose={() => setShowTrendDialog(false)}
@@ -156,90 +154,5 @@ export const App: FC<AppProps> = () => {
         />
       )}
     </>
-  )
-}
-
-export type MapPopupStatisticsProps = {
-  data: Location
-}
-
-import { makeStyles } from '@material-ui/styles'
-import { grey } from '@material-ui/core/colors'
-
-const useStyles = makeStyles({
-  statLabel: {
-    fontSize: 12,
-    color: grey[500],
-    fontWeight: 500,
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-    margin: 0
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    letterSpacing: '1px'
-  }
-})
-
-export const MapPopupStatistics: FC<MapPopupStatisticsProps> = ({ data }) => {
-  const styles = useStyles()
-  return (
-    <div>
-      <Box>
-        <Typography variant="h6">
-          {`${data.province} -  ${data.county} County`}
-        </Typography>
-      </Box>
-      <Box display={'flex'} textAlign={'center'}>
-        <Box p={2} flex={'auto'}>
-          <p className={styles.statLabel}>Confirmed</p>
-          <p className={styles.statValue}>
-            {data.latest.confirmed.toLocaleString()}
-          </p>
-        </Box>
-        <Box p={2} flex={'auto'}>
-          <p className={styles.statLabel}>Deaths</p>
-          <p className={styles.statValue}>
-            {data.latest.deaths.toLocaleString()}
-          </p>
-        </Box>
-        <Box p={2} flex={'auto'}>
-          <p className={styles.statLabel}>Recovered</p>
-          <p className={styles.statValue}>
-            {data.latest.recovered.toLocaleString()}
-          </p>
-        </Box>
-      </Box>
-
-      <p className={styles.statLabel}>
-        {format(new Date(data.last_updated), 'MM/dd/yyyy hh:mm')}
-      </p>
-    </div>
-  )
-}
-
-type HeaderStatisticsProps = {
-  data: Location
-}
-const HeaderStatistics: FC<HeaderStatisticsProps> = ({ data }) => {
-  const styles = useStyles()
-
-  return (
-    <Box display={'flex'} textAlign={'center'}>
-      <Box p={2} flex={'auto'}>
-        <label className={styles.statLabel}>Total Confirmed (US)</label>
-        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
-          {data.latest.confirmed.toLocaleString()}
-        </span>
-      </Box>
-      <Box p={2} flex={'auto'}>
-        <label className={styles.statLabel}>Total Fatalities (US)</label>
-        <span className={styles.statValue} style={{ paddingLeft: '10px' }}>
-          {data.latest.deaths.toLocaleString()}
-        </span>
-      </Box>
-    </Box>
   )
 }

@@ -1,1 +1,2 @@
-export * from './Drawer'
+export { Drawer } from './Drawer'
+export { PermanentDrawer } from './PermanentDrawer'
