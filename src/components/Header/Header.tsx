@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export type HeaderProps = {
   title: string
-  handleDrawerOpen: () => void
+  handleDrawerOpen?: () => void
   children?: ReactNode
 }
 export const Header: FC<HeaderProps> = ({
@@ -39,15 +39,17 @@ export const Header: FC<HeaderProps> = ({
   return (
     <AppBar position="static">
       <Toolbar variant="dense">
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="menu"
-          onClick={handleDrawerOpen}
-        >
-          <MenuIcon />
-        </IconButton>
+        {handleDrawerOpen && (
+          <IconButton
+            edge="start"
+            className={classes.menuButton}
+            color="inherit"
+            aria-label="menu"
+            onClick={handleDrawerOpen}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         <Typography variant="h6" className={classes.title}>
           {title}
         </Typography>
