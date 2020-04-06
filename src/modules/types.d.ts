@@ -38,3 +38,134 @@ export type TimelineValue = {
   confirmed: number
   type: 'confirmed' | 'deaths' | 'recovered'
 }
+
+export type CountryReport = {
+  positive: number
+  negative: number
+  pending: number
+  hospitalizedCurrently: number
+  hospitalizedCumulative: number
+  inIcuCurrently: number
+  inIcuCumulative: number
+  onVentilatorCurrently: number
+  onVentilatorCumulative: number
+  recovered: number
+  //hash: number : number73b7f127f2bcb86044258f4e57461db45e67e6e: number
+  lastModified: Date
+  death: number
+  hospitalized: number
+  total: number
+  totalTestResults: number
+  posNeg: number
+  notes: string
+}
+
+export type CountryDailyReport = {
+  date: Date
+  states: number
+  positive: number
+  negative: number
+  pending: number
+  hospitalizedCurrently: number
+  hospitalizedCumulative: number
+  inIcuCurrently: number
+  inIcuCumulative: number
+  onVentilatorCurrently: number
+  onVentilatorCumulative: number
+  recovered: number
+  //hash: GUID,
+  dateChecked: Date
+  death: number
+  hospitalized: number
+  total: number
+  totalTestResults: number
+  posNeg: number
+  deathIncrease: number
+  hospitalizedIncrease: number
+  negativeIncrease: number
+  positiveIncrease: number
+  totalTestResultsIncrease: number
+}
+export type StateReport = {
+  state: string
+  positive: number
+  positiveScore: number
+  negativeScore: number
+  negativeRegularScore: number
+  commercialScore: number
+  grade: string
+  score: number
+  negative: number
+  pending: number
+  hospitalizedCurrently: number
+  hospitalizedCumulative: number
+  inIcuCurrently: number
+  inIcuCumulative: number
+  onVentilatorCurrently: number
+  onVentilatorCumulative: number
+  recovered: number
+  lastUpdateEt: Date
+  checkTimeEt: Date
+  death: number
+  hospitalized: number
+  total: number
+  totalTestResults: number
+  posNeg: number
+  fips: string
+  dateModified: Date
+  dateChecked: Date
+  notes: string
+  //hash: guid
+}
+
+export type StateDailyReport = {
+  date: Date
+  state: string
+  positive: number
+  negative: number
+  pending: number
+  hospitalizedCurrently: number
+  hospitalizedCumulative: number
+  inIcuCurrently: number
+  inIcuCumulative: number
+  onVentilatorCurrently: number
+  onVentilatorCumulative: number
+  recovered: number
+  //hash: GUID,
+  dateChecked: Date
+  death: number
+  hospitalized: number
+  total: number
+  totalTestResults: number
+  posNeg: number
+  fips: string
+  deathIncrease: number
+  hospitalizedIncrease: number
+  negativeIncrease: number
+  positiveIncrease: number
+  totalTestResultsIncrease: number
+}
+
+export type CountiesApi = {
+  latest: {
+    confirmed: number
+    deaths: number
+    recovered: number
+  }
+  locations: {
+    id: number
+    country: string
+    country_code: string
+    country_population: number
+    province: string
+    county: string
+    last_updated: Date
+    coordinates: { latitude: number; longitude: number }
+    latest: {
+      confirmed: number
+      deaths: number
+      recovered: number
+    }
+    timelines: { confirmed: { timeline: { [key: string]: number } } }
+  }
+}

@@ -10,6 +10,18 @@ import { CountryApi, LocationsApi, Province, TimelineValue } from './types'
 import { ProvinceStatistics } from './Statistics'
 import { format } from 'date-fns'
 
+
+
+
+
+
+
+
+
+
+
+
+
 const drawerWidth = 425
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -23,7 +35,6 @@ const useStyles = makeStyles((theme: Theme) =>
     }
   })
 )
-
 
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
@@ -112,6 +123,7 @@ export const App: FC<AppProps> = () => {
 
   return (
     <>
+
       <main className={classes.content}>
         <Map
           center={
