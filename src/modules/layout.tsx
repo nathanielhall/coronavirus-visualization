@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 //import { Map, MapMarker } from 'components/Map'
 import { PermanentDrawer } from 'components/Drawer'
 // import { GrowthChart } from './GrowthChart'
@@ -10,14 +10,15 @@ import {
   StateDailyReport,
   StateReport,
   CountryDailyReport,
-  CountryReport
+  // CountryReport,
+  DailyReport
 } from './types'
 import { getStateName } from './states'
 // import { ProvinceStatistics } from './Statistics'
-// import { format } from 'date-fns'
+import { differenceInCalendarDays, parse } from 'date-fns'
 import { LineChart } from 'components/LineChart'
 
-const drawerWidth = 425
+const drawerWidth = 350
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -39,57 +40,94 @@ export const Layout: FC = () => {
   const [getStates, getStatesResponse] = useApi<StateReport[]>(
     'https://covidtracking.com/api/states'
   )
-  const [getStatesDaily, getStatesDailyResponse] = useApi<StateDailyReport[]>(
-    'https://covidtracking.com/api/states/daily'
-  )
-  const [, getUSResponse] = useApi<CountryReport[]>(
-    'https://covidtracking.com/api/us'
-  )
-  const [getUSDaily, getUSDailyResponse] = useApi<CountryDailyReport[]>(
-    'https://covidtracking.com/api/us/daily'
-  )
+
+  // const [, getUSResponse] = useApi<CountryReport[]>(
+  //   'https://covidtracking.com/api/us'
+  // )
+  const [USDailyRequest] = useApi<CountryDailyReport[]>()
+  const [USDaily, setUSDaily] = useState<DailyReport[]>()
+
+  const [StatesDailyRequest] = useApi<StateDailyReport[]>()
+  const [StatesDaily, setStatesDaily] = useState<DailyReport[] | undefined>()
+
   const [selectedState, setSelectedState] = useState<StateReport | undefined>()
 
   const listItemClick = (item: StateReport) => {
     setSelectedState(item)
   }
 
+  useEffect(() => {
+    const getUSDaily = async () => {
+      USDailyRequest.get<CountryDailyReport[]>(
+        'https://covidtracking.com/api/us/daily'
+      ).then((response) => {
+        if (response.status === 200) {
+          const report: DailyReport[] = response.data.reverse().map((item) => ({
+            yAxis: item.positive,
+            xAxis: differenceInCalendarDays(
+              parse(item.date.toString(), 'yyyyMMdd', new Date()),
+              new Date('03/04/2020')
+            )
+          }))
+
+          setUSDaily(report)
+        }
+      })
+    }
+
+    getUSDaily()
+  }, [])
+
+  useEffect(() => {
+    if (!selectedState) {
+      setStatesDaily(undefined)
+      return
+    }
+
+    const getStatesDaily = async () => {
+      StatesDailyRequest.get<StateDailyReport[]>(
+        'https://covidtracking.com/api/states/daily'
+      ).then((response) => {
+        if (response.status === 200) {
+          const data = response.data
+            .filter((x) => x.state === selectedState.state)
+            .reverse()
+
+          const report: DailyReport[] = data.map((item) => ({
+            yAxis: item.positive,
+            xAxis: differenceInCalendarDays(
+              parse(item.date.toString(), 'yyyyMMdd', new Date()),
+              new Date('03/04/2020')
+            )
+          }))
+          setStatesDaily(report)
+        }
+      })
+    }
+
+    getStatesDaily()
+  }, [selectedState])
+
   return (
     <>
       <main className={classes.content}>
-        {!getUSDaily.loading && getUSDailyResponse && (
-          <LineChart
-            data={getUSDailyResponse.data.reverse()}
-            xAxisKey="date"
-            yAxisKey="positive"
-          />
+        {!selectedState && USDaily && (
+          <LineChart data={USDaily} xAxisKey="xAxis" yAxisKey="yAxis" />
         )}
-        {selectedState && !getStatesDaily.loading && getStatesDailyResponse && (
-          <LineChart
-            data={getStatesDailyResponse.data
-              .filter((x) => x.state === selectedState.state)
-              .reverse()}
-            xAxisKey="date"
-            yAxisKey="positive"
-          />
+        {StatesDaily && (
+          <LineChart data={StatesDaily} xAxisKey="xAxis" yAxisKey="yAxis" />
         )}
-        {/* {getStatesDailyResponse && (
-          <pre>TEST{JSON.stringify(getStatesDailyResponse.data, null, 2)}</pre>
-        )} */}
       </main>
       <PermanentDrawer title={'Coronavirus Visualization'} width={drawerWidth}>
         <List>
-          {getUSResponse && getUSResponse.data && (
+          {USDaily && (
             <ListItem
               button
               selected={!selectedState}
               key={100}
               onClick={() => setSelectedState(undefined)}
             >
-              <ListItemText
-                primary={'United States'}
-                secondary={`Positive: ${getUSResponse.data[0].positive.toLocaleString()} Fatalities: ${getUSResponse.data[0].death.toLocaleString()}`}
-              />
+              <ListItemText primary={'United States'} />
             </ListItem>
           )}
           {!getStates.loading &&

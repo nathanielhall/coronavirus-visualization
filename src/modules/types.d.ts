@@ -39,6 +39,11 @@ export type TimelineValue = {
   type: 'confirmed' | 'deaths' | 'recovered'
 }
 
+export type DailyReport = {
+  xAxis: number
+  yAxis: number
+}
+
 export type CountryReport = {
   positive: number
   negative: number
@@ -119,7 +124,7 @@ export type StateReport = {
 }
 
 export type StateDailyReport = {
-  date: Date
+  date: number
   state: string
   positive: number
   negative: number
