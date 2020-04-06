@@ -45,10 +45,8 @@ export const Layout: FC = () => {
   //   'https://covidtracking.com/api/us'
   // )
   const [USDailyRequest] = useApi<CountryDailyReport[]>()
-  const [USDaily, setUSDaily] = useState<DailyReport[]>()
-
   const [StatesDailyRequest] = useApi<StateDailyReport[]>()
-  const [StatesDaily, setStatesDaily] = useState<DailyReport[] | undefined>()
+  const [dailyReport, setDailyReport] = useState<DailyReport[]>()
 
   const [selectedState, setSelectedState] = useState<StateReport | undefined>()
 
@@ -57,6 +55,26 @@ export const Layout: FC = () => {
   }
 
   useEffect(() => {
+    const getStatesDaily = async (selected: string) => {
+      StatesDailyRequest.get<StateDailyReport[]>(
+        'https://covidtracking.com/api/states/daily'
+      ).then((response) => {
+        if (response.status === 200) {
+          const data = response.data
+            .filter((x) => x.state === selected)
+            .reverse()
+
+          const report: DailyReport[] = data.map((item) => ({
+            yAxis: item.positive,
+            xAxis: differenceInCalendarDays(
+              parse(item.date.toString(), 'yyyyMMdd', new Date()),
+              new Date('03/04/2020')
+            )
+          }))
+          setDailyReport(report)
+        }
+      })
+    }
     const getUSDaily = async () => {
       USDailyRequest.get<CountryDailyReport[]>(
         'https://covidtracking.com/api/us/daily'
@@ -70,66 +88,32 @@ export const Layout: FC = () => {
             )
           }))
 
-          setUSDaily(report)
+          setDailyReport(report)
         }
       })
     }
 
-    getUSDaily()
-  }, [])
-
-  useEffect(() => {
-    if (!selectedState) {
-      setStatesDaily(undefined)
-      return
-    }
-
-    const getStatesDaily = async () => {
-      StatesDailyRequest.get<StateDailyReport[]>(
-        'https://covidtracking.com/api/states/daily'
-      ).then((response) => {
-        if (response.status === 200) {
-          const data = response.data
-            .filter((x) => x.state === selectedState.state)
-            .reverse()
-
-          const report: DailyReport[] = data.map((item) => ({
-            yAxis: item.positive,
-            xAxis: differenceInCalendarDays(
-              parse(item.date.toString(), 'yyyyMMdd', new Date()),
-              new Date('03/04/2020')
-            )
-          }))
-          setStatesDaily(report)
-        }
-      })
-    }
-
-    getStatesDaily()
+    if (!selectedState) getUSDaily()
+    if (selectedState) getStatesDaily(selectedState.state)
   }, [selectedState])
 
   return (
     <>
       <main className={classes.content}>
-        {!selectedState && USDaily && (
-          <LineChart data={USDaily} xAxisKey="xAxis" yAxisKey="yAxis" />
-        )}
-        {StatesDaily && (
-          <LineChart data={StatesDaily} xAxisKey="xAxis" yAxisKey="yAxis" />
+        {dailyReport && (
+          <LineChart data={dailyReport} xAxisKey="xAxis" yAxisKey="yAxis" />
         )}
       </main>
       <PermanentDrawer title={'Coronavirus Visualization'} width={drawerWidth}>
         <List>
-          {USDaily && (
-            <ListItem
-              button
-              selected={!selectedState}
-              key={100}
-              onClick={() => setSelectedState(undefined)}
-            >
-              <ListItemText primary={'United States'} />
-            </ListItem>
-          )}
+          <ListItem
+            button
+            selected={!selectedState}
+            key={100}
+            onClick={() => setSelectedState(undefined)}
+          >
+            <ListItemText primary={'United States'} />
+          </ListItem>
           {!getStates.loading &&
             getStatesResponse &&
             getStatesResponse.data.map((item, index) => (
