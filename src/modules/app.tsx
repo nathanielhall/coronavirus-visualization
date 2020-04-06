@@ -1,16 +1,14 @@
 import React, { FC, useState, useEffect } from 'react'
 import { Map, MapMarker } from 'components/Map'
-import { Header } from 'components/Header'
+
 import { PermanentDrawer } from 'components/Drawer'
 import { GrowthChart } from './GrowthChart'
 import { useApi } from 'src/api'
-import { List, ListItem, ListItemText, Button } from '@material-ui/core'
+import { List, ListItem, ListItemText } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
-import { CountryApi, LocationsApi, Province } from './types'
-import { CountryStatistics, ProvinceStatistics } from './Statistics'
-
-// FIXME: Find an API that can deliver results by state
-// FIXME: Remove accumulation of totals and use new Api  / this has potential for bugs
+import { CountryApi, LocationsApi, Province, TimelineValue } from './types'
+import { ProvinceStatistics } from './Statistics'
+import { format } from 'date-fns'
 
 const drawerWidth = 425
 
@@ -26,9 +24,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
+
 export type AppProps = {}
 export const App: FC<AppProps> = () => {
   const classes = useStyles()
+
+  //  https://covidtracking.com/api/v1/states/daily.json
+
   const [, countryResponse] = useApi<CountryApi>(
     'https://coronavirus-tracker-api.herokuapp.com/v2/locations/225'
   )
@@ -40,6 +42,8 @@ export const App: FC<AppProps> = () => {
     Province | undefined
   >()
   const [showTrendDialog, setShowTrendDialog] = useState(false)
+
+  const [countryTimeline, setCountryTimeline] = useState<TimelineValue[]>([])
 
   useEffect(() => {
     if (!locationsResponse) return
@@ -81,21 +85,33 @@ export const App: FC<AppProps> = () => {
     setSelectedProvince(selected)
   }, [locationsResponse])
 
+  useEffect(() => {
+    if (!countryResponse) return
+    const {
+      timelines: {
+        confirmed: { timeline }
+      }
+    } = countryResponse.data.location
+
+    if (!timeline) return
+
+    const confirmedCases: TimelineValue[] = Object.entries(timeline).map(
+      ([key, value]) => ({
+        key: format(new Date(key), 'MM-dd'),
+        confirmed: value,
+        type: 'confirmed'
+      })
+    )
+
+    setCountryTimeline(confirmedCases)
+  }, [countryResponse])
+
   const listItemClick = (item: Province) => {
     setSelectedProvince(item)
   }
 
   return (
     <>
-      <Header title="US Coronavirus (COVID-19) Visualization">
-        {countryResponse && (
-          <CountryStatistics data={countryResponse.data.location} />
-        )}
-        <Button color="inherit" onClick={() => setShowTrendDialog(true)}>
-          Spread
-        </Button>
-      </Header>
-
       <main className={classes.content}>
         <Map
           center={
@@ -139,7 +155,9 @@ export const App: FC<AppProps> = () => {
                 onClick={() => listItemClick(item)}
               >
                 <ListItemText
-                  primary={`${item.name} (${item.latest.confirmed})`}
+                  primary={`${
+                    item.name
+                  } (${item.latest.confirmed.toLocaleString()})`}
                   secondary={`Deaths: ${item.latest.deaths} Recovered: ${item.latest.recovered}`}
                 />
               </ListItem>
@@ -150,7 +168,7 @@ export const App: FC<AppProps> = () => {
       {showTrendDialog && countryResponse && (
         <GrowthChart
           onClose={() => setShowTrendDialog(false)}
-          data={countryResponse.data.location}
+          data={countryTimeline}
         />
       )}
     </>
