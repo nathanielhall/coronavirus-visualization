@@ -1,1 +1,5 @@
-export { CountryStatistics, ProvinceStatistics } from './Statistics'
+export {
+  CountryStatistics,
+  StateStatistics,
+  CountyStatistics
+} from './Statistics'
