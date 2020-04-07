@@ -2,7 +2,8 @@ import React, { FC } from 'react'
 import { Typography, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { grey } from '@material-ui/core/colors'
-import { Location } from '../types'
+import { Location, StateReport } from '../types'
+import { getStateName } from '../states'
 import { format } from 'date-fns'
 
 const useStyles = makeStyles({
@@ -45,10 +46,38 @@ export const CountryStatistics: FC<CountryStatisticsProps> = ({ data }) => {
   )
 }
 
-export type ProvinceStatisticsProps = {
+export type StateStatisticsProps = {
+  data: StateReport
+}
+export const StateStatistics: FC<StateStatisticsProps> = ({ data }) => {
+  const styles = useStyles()
+  return (
+    <div>
+      <Box>
+        <Typography variant="h6">{getStateName(data.state)}</Typography>
+      </Box>
+      <Box display={'flex'} textAlign={'center'}>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Positive</p>
+          <p className={styles.statValue}>{data.positive.toLocaleString()}</p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Deaths</p>
+          <p className={styles.statValue}>{data.death.toLocaleString()}</p>
+        </Box>
+      </Box>
+
+      <p className={styles.statLabel}>
+        {format(new Date(data.lastUpdateEt), 'MM/dd/yyyy hh:mm')}
+      </p>
+    </div>
+  )
+}
+
+export type CountyStatisticsProps = {
   data: Location
 }
-export const ProvinceStatistics: FC<ProvinceStatisticsProps> = ({ data }) => {
+export const CountyStatistics: FC<CountyStatisticsProps> = ({ data }) => {
   const styles = useStyles()
   return (
     <div>
@@ -80,6 +109,43 @@ export const ProvinceStatistics: FC<ProvinceStatisticsProps> = ({ data }) => {
 
       <p className={styles.statLabel}>
         {format(new Date(data.last_updated), 'MM/dd/yyyy hh:mm')}
+      </p>
+    </div>
+  )
+}
+
+export type StatisticsProps = {
+  title: string
+  positive: number
+  death: number
+  lastModified: Date
+}
+export const Statistics: FC<StatisticsProps> = ({
+  title,
+  positive,
+  death,
+  lastModified
+}) => {
+  const styles = useStyles()
+  return (
+    <div>
+      <Box>
+        <Typography variant="h6">{title}</Typography>
+      </Box>
+      <Box display={'flex'} textAlign={'center'}>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Positive</p>
+          <p className={styles.statValue}>{positive.toLocaleString()}</p>
+        </Box>
+
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Deaths</p>
+          <p className={styles.statValue}>{death.toLocaleString()}</p>
+        </Box>
+      </Box>
+
+      <p className={styles.statLabel}>
+        {format(new Date(lastModified), 'MM/dd/yyyy hh:mm')}
       </p>
     </div>
   )

@@ -7,20 +7,8 @@ import { useApi } from 'src/api'
 import { List, ListItem, ListItemText } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { CountryApi, LocationsApi, Province, TimelineValue } from './types'
-import { ProvinceStatistics } from './Statistics'
+import { CountyStatistics } from './Statistics'
 import { format } from 'date-fns'
-
-
-
-
-
-
-
-
-
-
-
-
 
 const drawerWidth = 425
 
@@ -123,7 +111,6 @@ export const App: FC<AppProps> = () => {
 
   return (
     <>
-
       <main className={classes.content}>
         <Map
           center={
@@ -148,7 +135,7 @@ export const App: FC<AppProps> = () => {
                     loc.coordinates.longitude
                   ]}
                 >
-                  <ProvinceStatistics data={loc} />
+                  <CountyStatistics data={loc} />
                 </MapMarker>
               ))}
         </Map>

@@ -10,14 +10,14 @@ import {
   StateDailyReport,
   StateReport,
   CountryDailyReport,
-  // CountryReport,
+  CountryReport,
   DailyReport
 } from './types'
 import { getStateName } from './states'
 // import { ProvinceStatistics } from './Statistics'
 import { differenceInCalendarDays, parse } from 'date-fns'
 import { LineChart } from 'components/LineChart'
-
+// import { Statistics } from './Statistics'
 const drawerWidth = 350
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -41,9 +41,9 @@ export const Layout: FC = () => {
     'https://covidtracking.com/api/states'
   )
 
-  // const [, getUSResponse] = useApi<CountryReport[]>(
-  //   'https://covidtracking.com/api/us'
-  // )
+  const [getUSRequest, getUSResponse] = useApi<CountryReport[]>(
+    'https://covidtracking.com/api/us'
+  )
   const [USDailyRequest] = useApi<CountryDailyReport[]>()
   const [StatesDailyRequest] = useApi<StateDailyReport[]>()
   const [dailyReport, setDailyReport] = useState<DailyReport[]>()
@@ -65,6 +65,8 @@ export const Layout: FC = () => {
             .reverse()
 
           const report: DailyReport[] = data.map((item) => ({
+            positive: item.positive,
+            death: item.death,
             yAxis: item.positive,
             xAxis: differenceInCalendarDays(
               parse(item.date.toString(), 'yyyyMMdd', new Date()),
@@ -81,11 +83,13 @@ export const Layout: FC = () => {
       ).then((response) => {
         if (response.status === 200) {
           const report: DailyReport[] = response.data.reverse().map((item) => ({
-            yAxis: item.positive,
+            positive: item.positive,
+            death: item.death,
             xAxis: differenceInCalendarDays(
               parse(item.date.toString(), 'yyyyMMdd', new Date()),
               new Date('03/04/2020')
-            )
+            ),
+            yAxis: item.positive
           }))
 
           setDailyReport(report)
@@ -106,14 +110,19 @@ export const Layout: FC = () => {
       </main>
       <PermanentDrawer title={'Coronavirus Visualization'} width={drawerWidth}>
         <List>
-          <ListItem
-            button
-            selected={!selectedState}
-            key={100}
-            onClick={() => setSelectedState(undefined)}
-          >
-            <ListItemText primary={'United States'} />
-          </ListItem>
+          {!getUSRequest.loading && getUSResponse && (
+            <ListItem
+              button
+              selected={!selectedState}
+              key={100}
+              onClick={() => setSelectedState(undefined)}
+            >
+              <ListItemText
+                primary={'United States'}
+                secondary={`Positive: ${getUSResponse.data[0].positive.toLocaleString()} Fatalities: ${getUSResponse.data[0].death.toLocaleString()}`}
+              />
+            </ListItem>
+          )}
           {!getStates.loading &&
             getStatesResponse &&
             getStatesResponse.data.map((item, index) => (

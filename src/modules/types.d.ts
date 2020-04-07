@@ -40,6 +40,8 @@ export type TimelineValue = {
 }
 
 export type DailyReport = {
+  positive: number
+  death: number
   xAxis: number
   yAxis: number
 }
