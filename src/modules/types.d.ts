@@ -46,6 +46,22 @@ export type DailyReport = {
   yAxis: number
 }
 
+export type Report = {
+  title: string
+  positive: number
+  death: number
+  lastModified: Date
+  // hospitalized: number
+  // hospitalizedCurrently: number
+  // inIcuCurrently: number
+  // onVentilatorCurrently: number
+}
+
+export type NavListItem = {
+  id: string
+  primary: string
+  secondary: string
+}
 export type CountryReport = {
   positive: number
   negative: number

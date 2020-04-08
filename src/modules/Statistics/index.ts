@@ -1,5 +1,6 @@
 export {
   CountryStatistics,
   StateStatistics,
-  CountyStatistics
+  CountyStatistics,
+  Statistics
 } from './Statistics'
