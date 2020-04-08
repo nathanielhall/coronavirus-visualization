@@ -168,27 +168,3 @@ export type StateDailyReport = {
   positiveIncrease: number
   totalTestResultsIncrease: number
 }
-
-export type CountiesApi = {
-  latest: {
-    confirmed: number
-    deaths: number
-    recovered: number
-  }
-  locations: {
-    id: number
-    country: string
-    country_code: string
-    country_population: number
-    province: string
-    county: string
-    last_updated: Date
-    coordinates: { latitude: number; longitude: number }
-    latest: {
-      confirmed: number
-      deaths: number
-      recovered: number
-    }
-    timelines: { confirmed: { timeline: { [key: string]: number } } }
-  }
-}
