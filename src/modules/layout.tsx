@@ -2,6 +2,7 @@ import React, { FC, useState, useEffect } from 'react'
 import { PermanentDrawer } from 'components/Drawer'
 import { useApi } from 'src/api'
 import { List, ListItem, ListItemText } from '@material-ui/core'
+import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import {
   LocationsApi,
@@ -59,7 +60,7 @@ export const Layout = () => {
   const [selectedNavItem, setSelectedNavItem] = useState<
     NavListItem | undefined
   >()
-
+  const [toggle, setToggle] = useState<'map' | 'statistics'>('statistics')
   const onSelectionChange = (item: NavListItem) => {
     setSelectedNavItem(item)
   }
@@ -135,21 +136,24 @@ export const Layout = () => {
   }
   const getCountryTimelineReport = () => {
     if (!requestCountryTimeline.loading && responseCountryTimeline) {
-      const d = responseCountryTimeline.data
+      const report: DailyReport[] = responseCountryTimeline.data.map(
+        (item) => ({
+          positive: item.positive,
+          death: item.death,
+          xAxis: differenceInCalendarDays(
+            parse(item.date.toString(), 'yyyyMMdd', new Date()),
+            new Date('03/04/2020') // FIXME:
+          ),
+          yAxis: item.positive
+        })
+      )
 
-      const report: DailyReport[] = d.reverse().map((item) => ({
-        positive: item.positive,
-        death: item.death,
-        xAxis: differenceInCalendarDays(
-          parse(item.date.toString(), 'yyyyMMdd', new Date()),
-          new Date('03/04/2020') // FIXME:
-        ),
-        yAxis: item.positive
-      }))
-
-      console.log('set country daily report', 'LOG')
-
-      setDailyReport(report)
+      setDailyReport(
+        report.sort((a, b) => {
+          if (a.xAxis < b.xAxis) return -1
+          return 1
+        })
+      )
     }
   }
 
@@ -189,7 +193,21 @@ export const Layout = () => {
         )}
       </PermanentDrawer>
       <main className={classes.content}>
-        {report && (
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={toggle}
+          onChange={(event, value: 'map' | 'statistics') => setToggle(value)}
+        >
+          <ToggleButton value="statistics">Statistics</ToggleButton>
+          <ToggleButton
+            disabled={selectedNavItem && selectedNavItem.id === 'US'}
+            value="map"
+          >
+            Map
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {report && toggle === 'statistics' && (
           <Statistics
             title={report.title}
             positive={report.positive}
@@ -197,10 +215,10 @@ export const Layout = () => {
             lastModified={report.lastModified}
           />
         )}
-        {dailyReport && (
+        {dailyReport && toggle === 'statistics' && (
           <LineChart data={dailyReport} xAxisKey="xAxis" yAxisKey="yAxis" />
         )}
-        {countiesReport && countiesReport.length > 0 && (
+        {countiesReport && toggle === 'map' && countiesReport.length > 0 && (
           <Map
             center={[
               countiesReport[0].coordinates.latitude,
