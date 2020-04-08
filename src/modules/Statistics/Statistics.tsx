@@ -150,3 +150,44 @@ export const Statistics: FC<StatisticsProps> = ({
     </div>
   )
 }
+
+export type MapPopupStatisticsProps = {
+  data: Location
+}
+
+export const MapPopupStatistics: FC<MapPopupStatisticsProps> = ({ data }) => {
+  const styles = useStyles()
+  return (
+    <div>
+      <Box>
+        <Typography variant="h6">
+          {`${data.province} -  ${data.county} County`}
+        </Typography>
+      </Box>
+      <Box display={'flex'} textAlign={'center'}>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Confirmed</p>
+          <p className={styles.statValue}>
+            {data.latest.confirmed.toLocaleString()}
+          </p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Deaths</p>
+          <p className={styles.statValue}>
+            {data.latest.deaths.toLocaleString()}
+          </p>
+        </Box>
+        <Box p={2} flex={'auto'}>
+          <p className={styles.statLabel}>Recovered</p>
+          <p className={styles.statValue}>
+            {data.latest.recovered.toLocaleString()}
+          </p>
+        </Box>
+      </Box>
+
+      <p className={styles.statLabel}>
+        {format(new Date(data.last_updated), 'MM/dd/yyyy hh:mm')}
+      </p>
+    </div>
+  )
+}

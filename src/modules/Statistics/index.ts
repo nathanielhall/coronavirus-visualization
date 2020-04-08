@@ -2,5 +2,6 @@ export {
   CountryStatistics,
   StateStatistics,
   CountyStatistics,
-  Statistics
+  Statistics,
+  MapPopupStatistics
 } from './Statistics'

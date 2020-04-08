@@ -4,6 +4,8 @@ import { useApi } from 'src/api'
 import { List, ListItem, ListItemText } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import {
+  LocationsApi,
+  Location,
   StateDailyReport,
   StateReport,
   CountryDailyReport,
@@ -15,7 +17,8 @@ import {
 import { getStateName } from './states'
 import { differenceInCalendarDays, parse } from 'date-fns'
 import { LineChart } from 'components/LineChart'
-import { Statistics } from './Statistics'
+import { Statistics, MapPopupStatistics } from './Statistics'
+import { Map, MapMarker } from 'components/Map'
 
 const drawerWidth = 350
 
@@ -32,9 +35,9 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export const Layout = () => {
-  // const [getCounties, getCountiesResponse] = useApi<CountiesApi>(
-  //   'https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&source=csbs'
-  // )
+  const [getCounties, getCountiesResponse] = useApi<LocationsApi>(
+    'https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&source=csbs'
+  )
   const classes = useStyles()
   const [requestCountry, responseCountry] = useApi<CountryReport[]>(
     'https://covidtracking.com/api/v1/us/current.json'
@@ -51,6 +54,7 @@ export const Layout = () => {
 
   const [dailyReport, setDailyReport] = useState<DailyReport[] | undefined>()
   const [report, setReport] = useState<Report | undefined>()
+  const [countiesReport, setCountiesReport] = useState<Location[] | undefined>()
   const [navItems, setNavItems] = useState<NavListItem[] | undefined>()
   const [selectedNavItem, setSelectedNavItem] = useState<
     NavListItem | undefined
@@ -149,6 +153,15 @@ export const Layout = () => {
     }
   }
 
+  const getCountiesToMap = () => {
+    if (!getCounties.loading && getCountiesResponse && selectedNavItem) {
+      const x = getCountiesResponse.data.locations.filter(
+        (x) => x.province === getStateName(selectedNavItem.id)
+      )
+      setCountiesReport(x)
+    }
+  }
+
   useEffect(() => {
     //  generate report and daily report
     if (!selectedNavItem) return
@@ -156,9 +169,11 @@ export const Layout = () => {
     if (selectedNavItem.id === 'US') {
       getCountryReport()
       getCountryTimelineReport()
+      setCountiesReport(undefined)
     } else {
       getStateReport(selectedNavItem.id)
       getStateTimelineReport(selectedNavItem.id)
+      getCountiesToMap()
     }
   }, [selectedNavItem])
 
@@ -184,6 +199,29 @@ export const Layout = () => {
         )}
         {dailyReport && (
           <LineChart data={dailyReport} xAxisKey="xAxis" yAxisKey="yAxis" />
+        )}
+        {countiesReport && countiesReport.length > 0 && (
+          <Map
+            center={[
+              countiesReport[0].coordinates.latitude,
+              countiesReport[0].coordinates.longitude
+            ]}
+            zoom={6}
+          >
+            {countiesReport.map((item) => (
+              <MapMarker
+                id={item.id}
+                key={item.id}
+                onClose={() => console.log('closed')}
+                position={[
+                  item.coordinates.latitude,
+                  item.coordinates.longitude
+                ]}
+              >
+                <MapPopupStatistics data={item} />
+              </MapMarker>
+            ))}
+          </Map>
         )}
       </main>
     </>
