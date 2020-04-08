@@ -5,7 +5,8 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Tooltip
 } from 'recharts'
 export type LineChartProps<TData> = {
   data: TData[]
@@ -19,8 +20,10 @@ export const LineChart: <TData>(
   <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
     <RCLineChart data={data as any[]}>
       <Line type="monotone" dataKey={yAxisKey.toString()} stroke="#8884d8" />
+
       <CartesianGrid stroke="#ccc" />
       <XAxis dataKey={xAxisKey.toString()} />
+      <Tooltip />
       <YAxis />
     </RCLineChart>
   </ResponsiveContainer>
