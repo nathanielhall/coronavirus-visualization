@@ -16,12 +16,23 @@ import {
   NavListItem
 } from './types'
 import { getStateName } from './states'
-import { differenceInCalendarDays, parse } from 'date-fns'
+// import { differenceInCalendarDays, parse } from 'date-fns'
 import { LineChart } from 'components/LineChart'
 import { Statistics, MapPopupStatistics } from './Statistics'
 import { Map, MapMarker } from 'components/Map'
-
+import {
+  stateReportToReport,
+  countryReportToReport,
+  filterCountiesByState,
+  countryTimelineToTimeline,
+  stateTimelineToTimeline
+} from './data-map'
 const drawerWidth = 350
+
+// type TreeMapType = {
+//   name: string
+//   children: { name: string; positive: number }[]
+// }
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -88,96 +99,45 @@ export const Layout = () => {
     setSelectedNavItem(USNavItem)
   }, [responseStates, responseCountry])
 
-  const getStateReport = (selectedItem: string) => {
-    if (!requestStates.loading && responseStates) {
-      const item = responseStates.data.find((x) => x.state === selectedItem)
-      if (!item) return
-      console.log('set states report', 'LOG')
-      setReport({
-        title: getStateName(item.state),
-        positive: item.positive,
-        death: item.death,
-        lastModified: item.lastUpdateEt
-      })
-    }
-  }
-  const getCountryReport = () => {
-    if (!requestCountry.loading && responseCountry) {
-      console.log('set country report', 'LOG')
-
-      const { positive, death, lastModified } = responseCountry.data[0]
-      setReport({
-        title: 'United States',
-        positive,
-        death,
-        lastModified
-      })
-    }
-  }
-  const getStateTimelineReport = (selectedItem: string) => {
-    if (!requestStatesTimeline.loading && responseStatesTimeline) {
-      const data = responseStatesTimeline.data
-        .filter((x) => x.state === selectedItem)
-        .reverse()
-
-      const report: DailyReport[] = data.map((item) => ({
-        positive: item.positive,
-        death: item.death,
-        yAxis: item.positive,
-        xAxis: differenceInCalendarDays(
-          parse(item.date.toString(), 'yyyyMMdd', new Date()),
-          new Date('03/04/2020')
-        )
-      }))
-      console.log('set states daily report', 'LOG')
-
-      setDailyReport(report)
-    }
-  }
-  const getCountryTimelineReport = () => {
-    if (!requestCountryTimeline.loading && responseCountryTimeline) {
-      const report: DailyReport[] = responseCountryTimeline.data.map(
-        (item) => ({
-          positive: item.positive,
-          death: item.death,
-          xAxis: differenceInCalendarDays(
-            parse(item.date.toString(), 'yyyyMMdd', new Date()),
-            new Date('03/04/2020') // FIXME:
-          ),
-          yAxis: item.positive
-        })
-      )
-
-      setDailyReport(
-        report.sort((a, b) => {
-          if (a.xAxis < b.xAxis) return -1
-          return 1
-        })
-      )
-    }
-  }
-
-  const getCountiesToMap = () => {
-    if (!getCounties.loading && getCountiesResponse && selectedNavItem) {
-      const x = getCountiesResponse.data.locations.filter(
-        (x) => x.province === getStateName(selectedNavItem.id)
-      )
-      setCountiesReport(x)
-    }
-  }
-
+  // switch out reporting data each time the nav item changes
   useEffect(() => {
-    //  generate report and daily report
     if (!selectedNavItem) return
 
     if (selectedNavItem.id === 'US') {
-      getCountryReport()
-      getCountryTimelineReport()
+      if (!requestCountry.loading && responseCountry) {
+        const result = countryReportToReport(responseCountry.data[0])
+        setReport(result)
+      }
+
+      if (!requestCountryTimeline.loading && responseCountryTimeline) {
+        const result = countryTimelineToTimeline(responseCountryTimeline.data)
+        setDailyReport(result)
+      }
+
       setCountiesReport(undefined)
     } else {
-      getStateReport(selectedNavItem.id)
-      getStateTimelineReport(selectedNavItem.id)
-      getCountiesToMap()
+      if (!requestStates.loading && responseStates) {
+        const result = stateReportToReport(
+          responseStates.data,
+          selectedNavItem.id
+        )
+        setReport(result)
+      }
+      if (!requestStatesTimeline.loading && responseStatesTimeline) {
+        const result = stateTimelineToTimeline(
+          responseStatesTimeline.data,
+          selectedNavItem.id
+        )
+        setDailyReport(result)
+      }
+
+      if (!getCounties.loading && getCountiesResponse && selectedNavItem) {
+        const result = filterCountiesByState(
+          getCountiesResponse.data.locations,
+          selectedNavItem.id
+        )
+        setCountiesReport(result)
+      }
     }
   }, [selectedNavItem])
 
