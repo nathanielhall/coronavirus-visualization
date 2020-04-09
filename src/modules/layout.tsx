@@ -17,7 +17,6 @@ import {
 } from './types'
 import { getStateName } from './states'
 // import { differenceInCalendarDays, parse } from 'date-fns'
-import { LineChart } from 'components/LineChart'
 import { Statistics, MapPopupStatistics } from './Statistics'
 import { Map, MapMarker } from 'components/Map'
 import {
@@ -27,6 +26,15 @@ import {
   countryTimelineToTimeline,
   stateTimelineToTimeline
 } from './data-map'
+import {
+  LineChart as RCLineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip
+} from 'recharts'
 const drawerWidth = 350
 
 // type TreeMapType = {
@@ -176,7 +184,17 @@ export const Layout = () => {
           />
         )}
         {dailyReport && toggle === 'statistics' && (
-          <LineChart data={dailyReport} xAxisKey="xAxis" yAxisKey="yAxis" />
+          <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+            <RCLineChart data={dailyReport}>
+              <Line type="monotone" dataKey={'positive'} stroke="#8884d8" />
+              <Line type="monotone" dataKey={'growth'} />
+              <Line type="monotone" dataKey={'death'} />
+              <CartesianGrid stroke="#ccc" />
+              <XAxis dataKey={'days'} />
+              <Tooltip />
+              <YAxis />
+            </RCLineChart>
+          </ResponsiveContainer>
         )}
         {countiesReport && toggle === 'map' && countiesReport.length > 0 && (
           <Map
