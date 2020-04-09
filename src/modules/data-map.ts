@@ -43,12 +43,18 @@ export const stateTimelineToTimeline = (
   const report: DailyReport[] = daily.map((item) => ({
     positive: item.positive,
     death: item.death,
-    yAxis: item.positive,
-    xAxis: differenceInCalendarDays(
+    days: differenceInCalendarDays(
       parse(item.date.toString(), 'yyyyMMdd', new Date()),
       new Date('03/04/2020')
-    )
+    ),
+    growth: 0
   }))
+
+  for (let i = 0; i < report.length; i++) {
+    if (i > 0) {
+      report[i].growth = report[i].positive - report[i - 1].positive
+    }
+  }
 
   return report
 }
@@ -57,17 +63,26 @@ export const countryTimelineToTimeline = (data: CountryDailyReport[]) => {
   const report: DailyReport[] = data.map((item) => ({
     positive: item.positive,
     death: item.death,
-    xAxis: differenceInCalendarDays(
+    days: differenceInCalendarDays(
       parse(item.date.toString(), 'yyyyMMdd', new Date()),
       new Date('03/04/2020') // FIXME:
     ),
-    yAxis: item.positive
+    growth: 0
   }))
 
-  return report.sort((a, b) => {
-    if (a.xAxis < b.xAxis) return -1
+  const sorted = report.sort((a, b) => {
+    if (a.days < b.days) return -1
     return 1
   })
+
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0) {
+      sorted[i].growth = sorted[i].positive - sorted[i - 1].positive
+      //growth percentage = sorted[i - 1].positive / (sorted[i].positive - sorted[i - 1].positive)
+    }
+  }
+
+  return sorted
 }
 
 export const filterCountiesByState = (
