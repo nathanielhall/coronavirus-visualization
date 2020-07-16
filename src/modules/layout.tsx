@@ -1,7 +1,7 @@
 import React, { FC, useState, useEffect } from 'react'
 import { PermanentDrawer } from 'components/Drawer'
 import { useApi } from 'src/api'
-import { List, ListItem, ListItemText } from '@material-ui/core'
+import { List, ListItem, ListItemText, Typography } from '@material-ui/core'
 import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import {
@@ -33,7 +33,9 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  BarChart,
+  Bar
 } from 'recharts'
 const drawerWidth = 350
 
@@ -184,17 +186,40 @@ export const Layout = () => {
           />
         )}
         {dailyReport && toggle === 'statistics' && (
-          <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
-            <RCLineChart data={dailyReport}>
-              <Line type="monotone" dataKey={'positive'} stroke="#8884d8" />
-              <Line type="monotone" dataKey={'growth'} />
-              <Line type="monotone" dataKey={'death'} />
-              <CartesianGrid stroke="#ccc" />
-              <XAxis dataKey={'days'} />
-              <Tooltip />
-              <YAxis />
-            </RCLineChart>
-          </ResponsiveContainer>
+          <>
+            <Typography variant="h5">Total Cases</Typography>
+            <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+              <RCLineChart data={dailyReport}>
+                <Line type="monotone" dataKey={'positive'} stroke="#8884d8" />
+                <CartesianGrid stroke="#ccc" />
+                <XAxis dataKey={'days'} />
+                <Tooltip />
+                <YAxis />
+              </RCLineChart>
+            </ResponsiveContainer>
+
+            <Typography variant="h5">Daily Deaths</Typography>
+            <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+              <RCLineChart data={dailyReport}>
+                <Line type="monotone" dataKey={'death'} stroke="#8884d8" />
+                <CartesianGrid stroke="#ccc" />
+                <XAxis dataKey={'days'} />
+                <Tooltip />
+                <YAxis />
+              </RCLineChart>
+            </ResponsiveContainer>
+
+            <Typography variant="h5">Daily Cases</Typography>
+            <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+              <BarChart data={dailyReport}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey={'days'} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="growth" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </>
         )}
         {countiesReport && toggle === 'map' && countiesReport.length > 0 && (
           <Map
