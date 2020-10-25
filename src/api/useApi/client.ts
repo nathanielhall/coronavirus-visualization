@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { RequestConfig, Response, RequestError } from './types'
 
-// FIXME:
-const baseURL = 'https://dog.ceo/api'
+// TOOD: this would normally be in env
+// const baseURL = 'http://localhost:8080/'
 
 // Set axios defaults here
-const axiosClient = axios.create({ baseURL, method: 'GET' })
+const axiosClient = axios.create({ method: 'GET' })
 let cancelToken = axios.CancelToken.source()
 
 const actions = {
