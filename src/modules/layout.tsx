@@ -58,21 +58,21 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const Layout = () => {
   const [getCounties, getCountiesResponse] = useApi<LocationsApi>(
-    'https://coronavirus-tracker-api.herokuapp.com/v2/locations?country_code=US&source=csbs'
+    'https://covid-tracker-us.herokuapp.com/v2/locations?country_code=US&source=csbs'
   )
   const classes = useStyles()
   const [requestCountry, responseCountry] = useApi<CountryReport[]>(
-    'https://covidtracking.com/api/v1/us/current.json'
+    'https://api.covidtracking.com/v1/us/current.json'
   )
   const [requestCountryTimeline, responseCountryTimeline] = useApi<
     CountryDailyReport[]
-  >('https://covidtracking.com/api/us/daily')
+  >('https://api.covidtracking.com/v1/us/daily.json')
   const [requestStates, responseStates] = useApi<StateReport[]>(
-    'https://covidtracking.com/api/states'
+    'https://api.covidtracking.com/v1/states/current.json'
   )
   const [requestStatesTimeline, responseStatesTimeline] = useApi<
     StateDailyReport[]
-  >('https://covidtracking.com/api/states/daily')
+  >('https://api.covidtracking.com/v1/states/daily.json')
 
   const [dailyReport, setDailyReport] = useState<DailyReport[] | undefined>()
   const [report, setReport] = useState<Report | undefined>()
