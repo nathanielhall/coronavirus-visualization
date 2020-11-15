@@ -1,31 +1,11 @@
 import React, { FC, useState, useEffect } from 'react'
 import { PermanentDrawer } from 'components/Drawer'
-import { useApi } from 'src/api'
 import { List, ListItem, ListItemText, Typography } from '@material-ui/core'
 import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
-import {
-  LocationsApi,
-  Location,
-  StateDailyReport,
-  StateReport,
-  CountryDailyReport,
-  CountryReport,
-  DailyReport,
-  Report,
-  NavListItem
-} from './types'
-import { getStateName } from './states'
-// import { differenceInCalendarDays, parse } from 'date-fns'
+import { Location, DailyReport, Report, NavListItem } from './types'
 import { Statistics, MapPopupStatistics } from './Statistics'
 import { Map, MapMarker } from 'components/Map'
-import {
-  stateReportToReport,
-  countryReportToReport,
-  filterCountiesByState,
-  countryTimelineToTimeline,
-  stateTimelineToTimeline
-} from './data-map'
 import {
   LineChart as RCLineChart,
   Line,
@@ -37,12 +17,8 @@ import {
   BarChart,
   Bar
 } from 'recharts'
+import { useDataProvider } from './data-provider'
 const drawerWidth = 350
-
-// type TreeMapType = {
-//   name: string
-//   children: { name: string; positive: number }[]
-// }
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -57,27 +33,10 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 export const Layout = () => {
-  const [getCounties, getCountiesResponse] = useApi<LocationsApi>(
-    'https://covid-tracker-us.herokuapp.com/v2/locations?country_code=US&source=csbs'
-  )
   const classes = useStyles()
-  const [requestCountry, responseCountry] = useApi<CountryReport[]>(
-    'https://api.covidtracking.com/v1/us/current.json'
-  )
-  const [requestCountryTimeline, responseCountryTimeline] = useApi<
-    CountryDailyReport[]
-  >('https://api.covidtracking.com/v1/us/daily.json')
-  const [requestStates, responseStates] = useApi<StateReport[]>(
-    'https://api.covidtracking.com/v1/states/current.json'
-  )
-  const [requestStatesTimeline, responseStatesTimeline] = useApi<
-    StateDailyReport[]
-  >('https://api.covidtracking.com/v1/states/daily.json')
-
   const [dailyReport, setDailyReport] = useState<DailyReport[] | undefined>()
   const [report, setReport] = useState<Report | undefined>()
   const [countiesReport, setCountiesReport] = useState<Location[] | undefined>()
-  const [navItems, setNavItems] = useState<NavListItem[] | undefined>()
   const [selectedNavItem, setSelectedNavItem] = useState<
     NavListItem | undefined
   >()
@@ -86,70 +45,32 @@ export const Layout = () => {
     setSelectedNavItem(item)
   }
 
-  // Navigation List Items
+  const {
+    loading,
+    navItems,
+    getReport,
+    getDailyReport,
+    getCounties
+  } = useDataProvider()
+
   useEffect(() => {
-    if (requestStates.loading || !responseStates) return
-    if (requestCountry.loading || !responseCountry) return
+    console.log(`loading: ${loading} hasNavItems: ${!!navItems}`)
+    if (loading) return
 
-    const items: NavListItem[] = responseStates.data.map((item) => ({
-      id: item.state,
-      primary: `${item.state} - ${getStateName(item.state)}`,
-      secondary: `Positive: ${item.positive.toLocaleString()} Fatalities: ${item.death.toLocaleString()}`
-    }))
+    const item = !selectedNavItem && !!navItems ? navItems[0] : selectedNavItem
+    if (!item) return
 
-    console.log('set nav items', 'LOG')
+    console.log(`selected item: ${item.id}`)
+    setReport(getReport(item))
 
-    const USNavItem = {
-      id: 'US',
-      primary: 'United States',
-      secondary: `Positive: ${responseCountry.data[0].positive.toLocaleString()} Fatalities: ${responseCountry.data[0].death.toLocaleString()}`
+    setDailyReport(getDailyReport(item))
+
+    if (item.id !== 'US') {
+      setCountiesReport(getCounties(item))
     }
-    setNavItems([USNavItem, ...items])
 
-    setSelectedNavItem(USNavItem)
-  }, [responseStates, responseCountry])
-
-  // switch out reporting data each time the nav item changes
-  useEffect(() => {
-    if (!selectedNavItem) return
-
-    if (selectedNavItem.id === 'US') {
-      if (!requestCountry.loading && responseCountry) {
-        const result = countryReportToReport(responseCountry.data[0])
-        setReport(result)
-      }
-
-      if (!requestCountryTimeline.loading && responseCountryTimeline) {
-        const result = countryTimelineToTimeline(responseCountryTimeline.data)
-        setDailyReport(result)
-      }
-
-      setCountiesReport(undefined)
-    } else {
-      if (!requestStates.loading && responseStates) {
-        const result = stateReportToReport(
-          responseStates.data,
-          selectedNavItem.id
-        )
-        setReport(result)
-      }
-      if (!requestStatesTimeline.loading && responseStatesTimeline) {
-        const result = stateTimelineToTimeline(
-          responseStatesTimeline.data,
-          selectedNavItem.id
-        )
-        setDailyReport(result)
-      }
-
-      if (!getCounties.loading && getCountiesResponse && selectedNavItem) {
-        const result = filterCountiesByState(
-          getCountiesResponse.data.locations,
-          selectedNavItem.id
-        )
-        setCountiesReport(result)
-      }
-    }
-  }, [selectedNavItem])
+    setSelectedNavItem(item)
+  }, [selectedNavItem, loading])
 
   return (
     <>
