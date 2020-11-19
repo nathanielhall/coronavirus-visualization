@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useApi } from 'src/api'
 import {
   LocationsApi,
@@ -14,53 +13,61 @@ import { differenceInCalendarDays, parse } from 'date-fns'
 
 const UNITED_STATES = 'US'
 
-export const useDataProvider = () => {
+export const useReport = (location: string) => {
   // Country -------------------------------------------------
   const [requestCountry, responseCountry] = useApi<CountryReport[]>(
     'https://api.covidtracking.com/v1/us/current.json'
   )
-  // Country Timeline -----------------------------------------
-  const [requestCountryTimeline, responseCountryTimeline] = useApi<
-    CountryDailyReport[]
-  >('https://api.covidtracking.com/v1/us/daily.json')
   // States ---------------------------------------------------
   const [requestStates, responseStates] = useApi<StateReport[]>(
     'https://api.covidtracking.com/v1/states/current.json'
   )
+
+  /** get the latest reportings for the selected navigation item (US or State) */
+  const getData = () => {
+    if (location === 'US') {
+      if (requestCountry.loading || !responseCountry) return
+
+      const { positive, death, lastModified } = responseCountry.data[0]
+      return {
+        title: 'United States',
+        positive,
+        death,
+        lastModified
+      }
+    } else {
+      if (requestStates.loading || !responseStates) return
+      const item = responseStates.data.find((x) => x.state === location)
+      if (!item) return
+
+      return {
+        title: getStateName(item.state),
+        positive: item.positive,
+        death: item.death,
+        lastModified: item.lastUpdateEt
+      }
+    }
+  }
+
+  const loading = requestCountry.loading || requestStates.loading
+  const data = loading ? [] : getData()
+
+  return [loading, data]
+}
+
+export const useTimelineReport = () => {
+  // Country Timeline -----------------------------------------
+  const [requestCountryTimeline, responseCountryTimeline] = useApi<
+    CountryDailyReport[]
+  >('https://api.covidtracking.com/v1/us/daily.json')
+
   // States Timeline ---------------------------------------------
   const [requestStatesTimeline, responseStatesTimeline] = useApi<
     StateDailyReport[]
   >('https://api.covidtracking.com/v1/states/daily.json')
 
-  // Counties ------------------------------------------------
-  const [requestCounties, responseCounties] = useApi<LocationsApi>(
-    'https://covid-tracker-us.herokuapp.com/v2/locations?country_code=US&source=csbs'
-  )
-  const [navItems, setNavItems] = useState<NavListItem[] | undefined>()
-
-  useEffect(() => {
-    if (requestStates.loading || !responseStates) return
-    if (requestCountry.loading || !responseCountry) return
-
-    console.log('Creating navigation items', 'Data Provider')
-    const items: NavListItem[] = responseStates.data.map((item) => ({
-      id: item.state,
-      primary: `${item.state} - ${getStateName(item.state)}`,
-      secondary: `Positive: ${item.positive.toLocaleString()} Fatalities: ${item.death.toLocaleString()}`
-    }))
-
-    const USNavItem = {
-      id: 'US',
-      primary: 'United States',
-      secondary: `Positive: ${responseCountry.data[0].positive.toLocaleString()} Fatalities: ${responseCountry.data[0].death.toLocaleString()}`
-    }
-
-    console.log('set nav items')
-    setNavItems([USNavItem, ...items])
-  }, [responseStates, responseCountry])
-
   /** get daily report (timeline) for the selected navigation item */
-  const getDailyReport = (selectedNavItem: NavListItem) => {
+  const getData = (selectedNavItem: NavListItem) => {
     if (selectedNavItem.id === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
       const report: DailyReport[] = responseCountryTimeline.data.map(
@@ -115,36 +122,20 @@ export const useDataProvider = () => {
     }
   }
 
-  /** get the latest reportings for the selected navigation item (US or State) */
-  const getReport = (selectedNavItem: NavListItem) => {
-    if (selectedNavItem.id === 'US') {
-      if (requestCountry.loading || !responseCountry) return
-
-      const { positive, death, lastModified } = responseCountry.data[0]
-      return {
-        title: 'United States',
-        positive,
-        death,
-        lastModified
-      }
-    } else {
-      if (requestStates.loading || !responseStates) return
-      const item = responseStates.data.find(
-        (x) => x.state === selectedNavItem.id
-      )
-      if (!item) return
-
-      return {
-        title: getStateName(item.state),
-        positive: item.positive,
-        death: item.death,
-        lastModified: item.lastUpdateEt
-      }
-    }
+  return {
+    loading: requestCountryTimeline.loading || requestStatesTimeline.loading,
+    getData
   }
+}
+
+export const useCountiesReport = () => {
+  // Counties ------------------------------------------------
+  const [requestCounties, responseCounties] = useApi<LocationsApi>(
+    'https://covid-tracker-us.herokuapp.com/v2/locations?country_code=US&source=csbs'
+  )
 
   /** get the latest reportings for the selected state */
-  const getCounties = (selectedNavItem: NavListItem) => {
+  const getData = (selectedNavItem: NavListItem) => {
     if (selectedNavItem.id === UNITED_STATES) return undefined
 
     if (requestCounties.loading || !responseCounties) return
@@ -157,10 +148,7 @@ export const useDataProvider = () => {
   }
 
   return {
-    loading: !navItems, // loading based on data loading and nav items created
-    navItems,
-    getCounties,
-    getReport,
-    getDailyReport
+    loading: requestCounties.loading,
+    getData
   }
 }
