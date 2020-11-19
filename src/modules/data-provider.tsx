@@ -52,13 +52,15 @@ export const useReport: (
         lastModified: item.lastUpdateEt
       })
     }
-  }, [requestCountry, requestStates])
+  }, [navSelection, responseCountry, responseStates])
 
   const loading = !data
   return [loading, data]
 }
 
-export const useTimelineReport = (navSelection: string) => {
+export const useTimelineReport: (
+  navSelection: string
+) => [boolean, DailyReport[] | undefined] = (navSelection: string) => {
   // Country Timeline -----------------------------------------
   const [requestCountryTimeline, responseCountryTimeline] = useApi<
     CountryDailyReport[]
@@ -72,6 +74,7 @@ export const useTimelineReport = (navSelection: string) => {
   const [data, setData] = useState<DailyReport[] | undefined>(undefined)
 
   useEffect(() => {
+    console.log('useEffect')
     if (navSelection === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
       const report: DailyReport[] = responseCountryTimeline.data.map(
@@ -124,7 +127,7 @@ export const useTimelineReport = (navSelection: string) => {
 
       setData(report)
     }
-  }, [requestCountryTimeline, requestStatesTimeline])
+  }, [navSelection, responseCountryTimeline, responseStatesTimeline])
 
   const loading = !data // assume still loading if data has not been set #TODO: add type to determine errors
   return [loading, data]

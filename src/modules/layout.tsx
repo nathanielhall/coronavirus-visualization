@@ -1,10 +1,29 @@
 import React, { useState, FC } from 'react'
-import { Grid, Paper, Container, Select, MenuItem } from '@material-ui/core'
+import {
+  Grid,
+  Paper,
+  Container,
+  Select,
+  MenuItem
+  // Typography
+} from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { Card } from './Statistics'
 import { states } from './states'
-import { useReport } from './data-provider'
+import { useReport, useTimelineReport } from './data-provider'
+import { DailyReport } from './types'
+import {
+  LineChart as RCLineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip
+  // BarChart,
+  // Bar
+} from 'recharts'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -31,7 +50,7 @@ export const Layout = () => {
   const [navSelection, setNavSelection] = useState(defaultSelection.key)
 
   const [reportLoading, report] = useReport(navSelection)
-  // const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
+  const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
 
   return (
     <div>
@@ -77,7 +96,9 @@ export const Layout = () => {
         </Grid>
         <Grid container spacing={3}>
           <Grid item xs>
-            <Paper className={classes.paper}>xs</Paper>
+            <AsyncComponent loading={dailyReportLoading}>
+              {!!dailyReport && <TotalCases data={dailyReport} />}
+            </AsyncComponent>
           </Grid>
           <Grid item xs>
             <Paper className={classes.paper}>xs</Paper>
@@ -102,3 +123,18 @@ const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
 
   return <>{children}</>
 }
+
+type TotalCasesProps = {
+  data: DailyReport[]
+}
+const TotalCases: FC<TotalCasesProps> = ({ data }) => (
+  <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+    <RCLineChart data={data}>
+      <Line type="monotone" dataKey={'positive'} stroke="#8884d8" />
+      <CartesianGrid stroke="#ccc" />
+      <XAxis dataKey={'days'} />
+      <Tooltip />
+      <YAxis />
+    </RCLineChart>
+  </ResponsiveContainer>
+)
