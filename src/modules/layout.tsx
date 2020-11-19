@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, FC } from 'react'
 import { Grid, Paper, Container, Select, MenuItem } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { Card } from './Statistics'
 import { states } from './states'
-import { useTimelineReport, useReport } from './data-provider'
+import { useReport } from './data-provider'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -30,7 +30,7 @@ export const Layout = () => {
   const [navSelection, setNavSelection] = useState(defaultSelection.key)
 
   const [reportLoading, report] = useReport(navSelection)
-  const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
+  // const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
 
   return (
     <div>
@@ -58,13 +58,12 @@ export const Layout = () => {
         </Select>
         <Grid container spacing={3}>
           <Grid item xs>
-            {reportLoading && <span>SShow SPinner</span>}
-            {!reportLoading && !!report && (
+            <AsyncComponent loading={reportLoading}>
               <Card
                 title="Total Cases"
-                primary={report.positive.toLocaleString()}
+                primary={report ? report.positive.toLocaleString() : ''}
               />
-            )}
+            </AsyncComponent>
           </Grid>
           <Grid item xs>
             <Card title="Total Fatalities" primary="200,000" />
@@ -87,4 +86,14 @@ export const Layout = () => {
       </Container>
     </div>
   )
+}
+
+type AsyncComponentProps = {
+  children: React.ReactNode
+  loading: boolean
+}
+const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
+  if (loading) return <span>Spinner</span>
+
+  return <>{children}</>
 }

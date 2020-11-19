@@ -7,7 +7,7 @@ import {
   CountryReport,
   DailyReport,
   Report,
-  NavListItem
+  Location
 } from './types'
 import { getStateName } from './states'
 import { differenceInCalendarDays, parse } from 'date-fns'
@@ -130,27 +130,26 @@ export const useTimelineReport = (navSelection: string) => {
   return [loading, data]
 }
 
-export const useCountiesReport = () => {
+export const useCountiesReport = (navSelection: string) => {
   // Counties ------------------------------------------------
   const [requestCounties, responseCounties] = useApi<LocationsApi>(
     'https://covid-tracker-us.herokuapp.com/v2/locations?country_code=US&source=csbs'
   )
 
-  /** get the latest reportings for the selected state */
-  const getData = (selectedNavItem: NavListItem) => {
-    if (selectedNavItem.id === UNITED_STATES) return undefined
+  const [data, setData] = useState<Location[] | undefined>(undefined)
+
+  useEffect(() => {
+    if (navSelection === UNITED_STATES) return
 
     if (requestCounties.loading || !responseCounties) return
 
     const result = responseCounties.data.locations.filter(
-      (x) => x.province === getStateName(selectedNavItem.id)
+      (x) => x.province === getStateName(navSelection)
     )
 
-    return result
-  }
+    setData(result)
+  }, [requestCounties])
 
-  return {
-    loading: requestCounties.loading,
-    data
-  }
+  const loading = !data // assume still loading if data has not been set #TODO: add type to determine errors
+  return [loading, data]
 }
