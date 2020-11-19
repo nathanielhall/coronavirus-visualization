@@ -3,6 +3,7 @@ import { Grid, Paper, Container, Select, MenuItem } from '@material-ui/core'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { Card } from './Statistics'
 import { states } from './states'
+import { useTimelineReport, useReport } from './data-provider'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -24,12 +25,12 @@ const useStyles = makeStyles((theme: Theme) =>
 export const Layout = () => {
   const classes = useStyles()
 
-  // const [reportLoading, report] = useReport(selection)
-  // const [timelineReportLoading, getTimelineReport] = useState(selection)
-  // const [countiesReportLoading, getCountiesReport] = useState(selection)
   const navigationOptions = [{ key: 'US', value: 'Overall U.S' }, ...states]
   const [defaultSelection] = navigationOptions
   const [navSelection, setNavSelection] = useState(defaultSelection.key)
+
+  const [reportLoading, report] = useReport(navSelection)
+  const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
 
   return (
     <div>
@@ -57,7 +58,13 @@ export const Layout = () => {
         </Select>
         <Grid container spacing={3}>
           <Grid item xs>
-            <Card title="Total Cases" primary="4.5M" />
+            {reportLoading && <span>SShow SPinner</span>}
+            {!reportLoading && !!report && (
+              <Card
+                title="Total Cases"
+                primary={report.positive.toLocaleString()}
+              />
+            )}
           </Grid>
           <Grid item xs>
             <Card title="Total Fatalities" primary="200,000" />

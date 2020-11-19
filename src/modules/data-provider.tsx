@@ -6,14 +6,18 @@ import {
   CountryDailyReport,
   CountryReport,
   DailyReport,
+  Report,
   NavListItem
 } from './types'
 import { getStateName } from './states'
 import { differenceInCalendarDays, parse } from 'date-fns'
+import { useEffect, useState } from 'react'
 
 const UNITED_STATES = 'US'
 
-export const useReport = (location: string) => {
+export const useReport: (
+  navSelection: string
+) => [boolean, Report | undefined] = (navSelection: string) => {
   // Country -------------------------------------------------
   const [requestCountry, responseCountry] = useApi<CountryReport[]>(
     'https://api.covidtracking.com/v1/us/current.json'
@@ -23,39 +27,38 @@ export const useReport = (location: string) => {
     'https://api.covidtracking.com/v1/states/current.json'
   )
 
-  /** get the latest reportings for the selected navigation item (US or State) */
-  const getData = () => {
-    if (location === 'US') {
+  const [data, setData] = useState<Report | undefined>(undefined)
+
+  useEffect(() => {
+    if (navSelection === 'US') {
       if (requestCountry.loading || !responseCountry) return
 
       const { positive, death, lastModified } = responseCountry.data[0]
-      return {
+      setData({
         title: 'United States',
         positive,
         death,
         lastModified
-      }
+      })
     } else {
       if (requestStates.loading || !responseStates) return
-      const item = responseStates.data.find((x) => x.state === location)
+      const item = responseStates.data.find((x) => x.state === navSelection)
       if (!item) return
 
-      return {
+      setData({
         title: getStateName(item.state),
         positive: item.positive,
         death: item.death,
         lastModified: item.lastUpdateEt
-      }
+      })
     }
-  }
+  }, [requestCountry, requestStates])
 
-  const loading = requestCountry.loading || requestStates.loading
-  const data = loading ? [] : getData()
-
+  const loading = !data
   return [loading, data]
 }
 
-export const useTimelineReport = () => {
+export const useTimelineReport = (navSelection: string) => {
   // Country Timeline -----------------------------------------
   const [requestCountryTimeline, responseCountryTimeline] = useApi<
     CountryDailyReport[]
@@ -66,9 +69,10 @@ export const useTimelineReport = () => {
     StateDailyReport[]
   >('https://api.covidtracking.com/v1/states/daily.json')
 
-  /** get daily report (timeline) for the selected navigation item */
-  const getData = (selectedNavItem: NavListItem) => {
-    if (selectedNavItem.id === UNITED_STATES) {
+  const [data, setData] = useState<DailyReport[] | undefined>(undefined)
+
+  useEffect(() => {
+    if (navSelection === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
       const report: DailyReport[] = responseCountryTimeline.data.map(
         (item) => ({
@@ -94,12 +98,12 @@ export const useTimelineReport = () => {
         }
       }
 
-      return sorted
+      setData(sorted)
     } else {
       if (requestStatesTimeline.loading || !responseStatesTimeline) return
 
       const daily = responseStatesTimeline.data
-        .filter((x) => x.state === selectedNavItem.id)
+        .filter((x) => x.state === navSelection)
         .reverse()
 
       const report: DailyReport[] = daily.map((item) => ({
@@ -118,14 +122,12 @@ export const useTimelineReport = () => {
         }
       }
 
-      return report
+      setData(report)
     }
-  }
+  }, [requestCountryTimeline, requestStatesTimeline])
 
-  return {
-    loading: requestCountryTimeline.loading || requestStatesTimeline.loading,
-    getData
-  }
+  const loading = !data // assume still loading if data has not been set #TODO: add type to determine errors
+  return [loading, data]
 }
 
 export const useCountiesReport = () => {
@@ -149,6 +151,6 @@ export const useCountiesReport = () => {
 
   return {
     loading: requestCounties.loading,
-    getData
+    data
   }
 }
