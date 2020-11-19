@@ -1,5 +1,6 @@
 import React, { useState, FC } from 'react'
 import { Grid, Paper, Container, Select, MenuItem } from '@material-ui/core'
+import Skeleton from '@material-ui/lab/Skeleton'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { Card } from './Statistics'
 import { states } from './states'
@@ -59,10 +60,12 @@ export const Layout = () => {
         <Grid container spacing={3}>
           <Grid item xs>
             <AsyncComponent loading={reportLoading}>
-              <Card
-                title="Total Cases"
-                primary={report ? report.positive.toLocaleString() : ''}
-              />
+              {!!report ? (
+                <Card
+                  title="Total Cases"
+                  primary={report.positive.toLocaleString()}
+                />
+              ) : null}
             </AsyncComponent>
           </Grid>
           <Grid item xs>
@@ -93,7 +96,9 @@ type AsyncComponentProps = {
   loading: boolean
 }
 const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
-  if (loading) return <span>Spinner</span>
+  if (loading) {
+    return <Skeleton variant="rect" width="100%" height="100%" />
+  }
 
   return <>{children}</>
 }
