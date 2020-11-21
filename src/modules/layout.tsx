@@ -1,15 +1,8 @@
 import React, { useState, FC } from 'react'
-import {
-  Grid,
-  Paper,
-  Container,
-  Select,
-  MenuItem
-  // Typography
-} from '@material-ui/core'
+import { Grid, Container, Select, MenuItem } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
-import { Card } from './Statistics'
+import { Card, Panel } from './Statistics'
 import { states } from './states'
 import { useReport, useTimelineReport } from './data-provider'
 import { DailyReport } from './types'
@@ -21,6 +14,7 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip
+  // Legend
   // BarChart,
   // Bar
 } from 'recharts'
@@ -39,6 +33,12 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: '10px',
       fontSize: '2rem',
       fontWeight: 'bold'
+    },
+    title: {
+      fontSize: '11px',
+      textTransform: 'uppercase',
+      fontWeight: 'bold',
+      marginBottom: '4px'
     }
   })
 )
@@ -94,18 +94,16 @@ export const Layout = () => {
             <Card title="Active" primary="12,000" secondary="last two weeks" />
           </Grid>
         </Grid>
+
         <Grid container spacing={3}>
           <Grid item xs>
-            <AsyncComponent loading={dailyReportLoading}>
+            <Panel title="Total Cases" loading={dailyReportLoading}>
               {!!dailyReport && <TotalCases data={dailyReport} />}
-            </AsyncComponent>
+            </Panel>
           </Grid>
-          <Grid item xs>
-            <Paper className={classes.paper}>xs</Paper>
-          </Grid>
-          <Grid item xs>
-            <Paper className={classes.paper}>xs</Paper>
-          </Grid>
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs></Grid>
         </Grid>
       </Container>
     </div>
@@ -124,17 +122,22 @@ const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
   return <>{children}</>
 }
 
+// charts
+// LineChart
+// -- positive
+// -- death
+
 type TotalCasesProps = {
   data: DailyReport[]
 }
 const TotalCases: FC<TotalCasesProps> = ({ data }) => (
   <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
     <RCLineChart data={data}>
-      <Line type="monotone" dataKey={'positive'} stroke="#8884d8" />
-      <CartesianGrid stroke="#ccc" />
-      <XAxis dataKey={'days'} />
-      <Tooltip />
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="days" />
       <YAxis />
+      <Tooltip />
+      <Line type="monotone" dataKey="positive" stroke="#8884d8" />
     </RCLineChart>
   </ResponsiveContainer>
 )
