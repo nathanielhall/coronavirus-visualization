@@ -54,8 +54,12 @@ export const Layout = () => {
     navSelection
   )
 
+  const [selectedDailyChart, setSelectedDailyChart] = useState(
+    'positiveIncrease'
+  )
   return (
     <div>
+      {/* <Header title="COVID-19 Dashboard" /> */}
       <Container fixed>
         <Select
           disableUnderline
@@ -113,34 +117,29 @@ export const Layout = () => {
           </Grid>
         </Grid>
 
-        <DailyChart
-          title="Daily Cases"
-          loading={dailyReportLoading}
-          data={dailyReport}
-          xAxis="days"
-          yAxis="positiveIncrease"
-        />
-        <DailyChart
-          title="Daily Fatalities"
-          loading={dailyReportLoading}
-          data={dailyReport}
-          xAxis="days"
-          yAxis="deathIncrease"
-        />
-        <DailyChart
-          title="Daily Testing"
-          loading={dailyReportLoading}
-          data={dailyReport}
-          xAxis="days"
-          yAxis="totalTestResultsIncrease"
-        />
-        <DailyChart
-          title="Daily Hospitalized"
-          loading={dailyReportLoading}
-          data={dailyReport}
-          xAxis="days"
-          yAxis="hospitalizedIncrease"
-        />
+        <Select
+          onChange={(e) => setSelectedDailyChart(e.target.value as string)}
+          value={selectedDailyChart}
+        >
+          <MenuItem value="positiveIncrease">Cases</MenuItem>
+          <MenuItem value="deathIncrease">Fatalities</MenuItem>
+          <MenuItem value="totalTestResultsIncrease">Testing</MenuItem>
+          <MenuItem value="hospitalizedIncrease">Hospitalized</MenuItem>
+        </Select>
+
+        <Grid container spacing={3}>
+          <Grid item xs>
+            <Panel title={''} loading={dailyReportLoading}>
+              {!!dailyReport && (
+                <DailyReportChart
+                  data={dailyReport}
+                  xAxis={'days'}
+                  yAxis={selectedDailyChart}
+                />
+              )}
+            </Panel>
+          </Grid>
+        </Grid>
 
         <Grid container spacing={3}>
           <Grid item xs></Grid>
@@ -149,28 +148,28 @@ export const Layout = () => {
     </div>
   )
 }
-type DailyChartProps = {
-  loading: boolean
-  title: string
-  data: DailyReport[] | undefined
-  xAxis: string
-  yAxis: string
-}
-const DailyChart: FC<DailyChartProps> = ({
-  loading,
-  title,
-  data,
-  xAxis,
-  yAxis
-}) => (
-  <Grid container spacing={3}>
-    <Grid item xs>
-      <Panel title={title} loading={loading}>
-        {!!data && <DailyReportChart data={data} xAxis={xAxis} yAxis={yAxis} />}
-      </Panel>
-    </Grid>
-  </Grid>
-)
+// type DailyChartProps = {
+//   loading: boolean
+//   title: string
+//   data: DailyReport[] | undefined
+//   xAxis: string
+//   yAxis: string
+// }
+// const DailyChart: FC<DailyChartProps> = ({
+//   loading,
+//   title,
+//   data,
+//   xAxis,
+//   yAxis
+// }) => (
+//   <Grid container spacing={3}>
+//     <Grid item xs>
+//       <Panel title={title} loading={loading}>
+//         {!!data && <DailyReportChart data={data} xAxis={xAxis} yAxis={yAxis} />}
+//       </Panel>
+//     </Grid>
+//   </Grid>
+// )
 
 type AsyncComponentProps = {
   children: React.ReactNode
