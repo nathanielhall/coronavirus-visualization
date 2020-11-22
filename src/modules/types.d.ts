@@ -39,11 +39,17 @@ export type TimelineValue = {
   type: 'confirmed' | 'deaths' | 'recovered'
 }
 
+export type RecentReport = { positive: number; deaths: number }
+
 export type DailyReport = {
   positive: number
   death: number
   days: number
-  growth: number
+  // formattedDate: string
+  positiveIncrease: number
+  deathIncrease: number
+  totalTestResultsIncrease: number
+  hospitalizedIncrease: number
 }
 
 export type Report = {

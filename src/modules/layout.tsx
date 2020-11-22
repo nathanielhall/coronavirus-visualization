@@ -7,16 +7,16 @@ import { states } from './states'
 import { useReport, useTimelineReport } from './data-provider'
 import { DailyReport } from './types'
 import {
-  LineChart as RCLineChart,
-  Line,
+  // LineChart as RCLineChart,
+  // Line,
   CartesianGrid,
   XAxis,
   YAxis,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
   // Legend
-  // BarChart,
-  // Bar
+  BarChart,
+  Bar
 } from 'recharts'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -45,12 +45,14 @@ const useStyles = makeStyles((theme: Theme) =>
 export const Layout = () => {
   const classes = useStyles()
 
-  const navigationOptions = [{ key: 'US', value: 'Overall U.S' }, ...states]
-  const [defaultSelection] = navigationOptions
+  const defaultSelection = { key: 'US', value: 'Overall U.S' }
+  const navigationOptions = [defaultSelection, ...states]
   const [navSelection, setNavSelection] = useState(defaultSelection.key)
 
   const [reportLoading, report] = useReport(navSelection)
-  const [dailyReportLoading, dailyReport] = useTimelineReport(navSelection)
+  const [dailyReportLoading, dailyReport, recentReport] = useTimelineReport(
+    navSelection
+  )
 
   return (
     <div>
@@ -73,7 +75,9 @@ export const Layout = () => {
           }}
         >
           {navigationOptions.map((s) => (
-            <MenuItem value={s.key}>{s.value}</MenuItem>
+            <MenuItem key={s.key} value={s.key}>
+              {s.value}
+            </MenuItem>
           ))}
         </Select>
         <Grid container spacing={3}>
@@ -88,20 +92,56 @@ export const Layout = () => {
             </AsyncComponent>
           </Grid>
           <Grid item xs>
-            <Card title="Total Fatalities" primary="200,000" />
+            <AsyncComponent loading={reportLoading}>
+              {!!report ? (
+                <Card
+                  title="Total Fatalities"
+                  primary={report.death.toLocaleString()}
+                />
+              ) : null}
+            </AsyncComponent>
           </Grid>
           <Grid item xs>
-            <Card title="Active" primary="12,000" secondary="last two weeks" />
+            <AsyncComponent loading={dailyReportLoading}>
+              {!!recentReport ? (
+                <Card
+                  title="Active Cases (last 2 weeks)"
+                  primary={recentReport.positive.toLocaleString()}
+                />
+              ) : null}
+            </AsyncComponent>
           </Grid>
         </Grid>
 
-        <Grid container spacing={3}>
-          <Grid item xs>
-            <Panel title="Total Cases" loading={dailyReportLoading}>
-              {!!dailyReport && <TotalCases data={dailyReport} />}
-            </Panel>
-          </Grid>
-        </Grid>
+        <DailyChart
+          title="Daily Cases"
+          loading={dailyReportLoading}
+          data={dailyReport}
+          xAxis="days"
+          yAxis="positiveIncrease"
+        />
+        <DailyChart
+          title="Daily Fatalities"
+          loading={dailyReportLoading}
+          data={dailyReport}
+          xAxis="days"
+          yAxis="deathIncrease"
+        />
+        <DailyChart
+          title="Daily Testing"
+          loading={dailyReportLoading}
+          data={dailyReport}
+          xAxis="days"
+          yAxis="totalTestResultsIncrease"
+        />
+        <DailyChart
+          title="Daily Hospitalized"
+          loading={dailyReportLoading}
+          data={dailyReport}
+          xAxis="days"
+          yAxis="hospitalizedIncrease"
+        />
+
         <Grid container spacing={3}>
           <Grid item xs></Grid>
         </Grid>
@@ -109,6 +149,28 @@ export const Layout = () => {
     </div>
   )
 }
+type DailyChartProps = {
+  loading: boolean
+  title: string
+  data: DailyReport[] | undefined
+  xAxis: string
+  yAxis: string
+}
+const DailyChart: FC<DailyChartProps> = ({
+  loading,
+  title,
+  data,
+  xAxis,
+  yAxis
+}) => (
+  <Grid container spacing={3}>
+    <Grid item xs>
+      <Panel title={title} loading={loading}>
+        {!!data && <DailyReportChart data={data} xAxis={xAxis} yAxis={yAxis} />}
+      </Panel>
+    </Grid>
+  </Grid>
+)
 
 type AsyncComponentProps = {
   children: React.ReactNode
@@ -122,22 +184,37 @@ const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
   return <>{children}</>
 }
 
-// charts
-// LineChart
-// -- positive
-// -- death
-
-type TotalCasesProps = {
+type DailyReportChartProps = {
   data: DailyReport[]
+  xAxis: string
+  yAxis: string
 }
-const TotalCases: FC<TotalCasesProps> = ({ data }) => (
+const DailyReportChart: FC<DailyReportChartProps> = ({
+  data,
+  xAxis,
+  yAxis
+}) => (
   <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
-    <RCLineChart data={data}>
+    <BarChart data={data}>
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="days" />
+      <XAxis dataKey={xAxis} />
       <YAxis />
       <Tooltip />
-      <Line type="monotone" dataKey="positive" stroke="#8884d8" />
-    </RCLineChart>
+      <Bar dataKey={yAxis} fill="#8884d8" />
+    </BarChart>
   </ResponsiveContainer>
 )
+// type TotalCasesProps = {
+//   data: DailyReport[]
+// }
+// const TotalCases: FC<TotalCasesProps> = ({ data }) => (
+//   <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
+//     <RCLineChart data={data}>
+//       <CartesianGrid strokeDasharray="3 3" />
+//       <XAxis dataKey="days" />
+//       <YAxis />
+//       <Tooltip />
+//       <Line type="monotone" dataKey="positive" stroke="#8884d8" />
+//     </RCLineChart>
+//   </ResponsiveContainer>
+// )

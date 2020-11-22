@@ -30,7 +30,7 @@ type CardProps = {
   primary: string
   secondary?: string
 }
-export const Card: FC<CardProps> = ({ title, primary, secondary = '' }) => {
+export const Card: FC<CardProps> = ({ title, primary, secondary }) => {
   const classes = useStyles()
 
   return (
@@ -72,3 +72,11 @@ export const Panel: FC<PanelProps> = ({ children, title, loading = false }) => {
     </div>
   )
 }
+
+/* <Typography
+          style={{ display: 'inline', paddingRight: '5px' }}
+          variant="h5"
+        >
+          {primary}
+        </Typography>
+        {secondary && <Typography variant="caption">{secondary}</Typography>} */

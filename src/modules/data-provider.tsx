@@ -7,10 +7,14 @@ import {
   CountryReport,
   DailyReport,
   Report,
-  Location
+  Location,
+  RecentReport
 } from './types'
 import { getStateName } from './states'
-import { differenceInCalendarDays, parse } from 'date-fns'
+// import {
+//   // differenceInCalendarDays,
+//   parse
+// } from 'date-fns'
 import { useEffect, useState } from 'react'
 
 const UNITED_STATES = 'US'
@@ -30,9 +34,10 @@ export const useReport: (
   const [data, setData] = useState<Report | undefined>(undefined)
 
   useEffect(() => {
-    if (navSelection === 'US') {
+    if (navSelection === UNITED_STATES) {
       if (requestCountry.loading || !responseCountry) return
 
+      console.log('process report')
       const { positive, death, lastModified } = responseCountry.data[0]
       setData({
         title: 'United States',
@@ -40,8 +45,14 @@ export const useReport: (
         death,
         lastModified
       })
-    } else {
+    }
+  }, [navSelection, responseCountry])
+
+  useEffect(() => {
+    if (navSelection !== UNITED_STATES) {
       if (requestStates.loading || !responseStates) return
+
+      console.log('process report')
       const item = responseStates.data.find((x) => x.state === navSelection)
       if (!item) return
 
@@ -52,7 +63,7 @@ export const useReport: (
         lastModified: item.lastUpdateEt
       })
     }
-  }, [navSelection, responseCountry, responseStates])
+  }, [navSelection, responseStates])
 
   const loading = !data
   return [loading, data]
@@ -60,7 +71,9 @@ export const useReport: (
 
 export const useTimelineReport: (
   navSelection: string
-) => [boolean, DailyReport[] | undefined] = (navSelection: string) => {
+) => [boolean, DailyReport[] | undefined, RecentReport] = (
+  navSelection: string
+) => {
   // Country Timeline -----------------------------------------
   const [requestCountryTimeline, responseCountryTimeline] = useApi<
     CountryDailyReport[]
@@ -74,64 +87,75 @@ export const useTimelineReport: (
   const [data, setData] = useState<DailyReport[] | undefined>(undefined)
 
   useEffect(() => {
-    console.log('useEffect')
+    console.log(
+      `useEffect (COUNTRY) Selection: ${navSelection} Loading: ${
+        requestCountryTimeline.loading
+      } EmptyResponse: ${!responseCountryTimeline}`
+    )
+
     if (navSelection === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
-      const report: DailyReport[] = responseCountryTimeline.data.map(
-        (item) => ({
-          positive: item.positive,
-          death: item.death,
-          days: differenceInCalendarDays(
-            parse(item.date.toString(), 'yyyyMMdd', new Date()),
-            new Date('03/04/2020') // FIXME:
-          ),
-          growth: 0
-        })
-      )
 
-      const sorted = report.sort((a, b) => {
-        if (a.days < b.days) return -1
-        return 1
-      })
+      console.log('process data')
 
-      for (let i = 0; i < sorted.length; i++) {
-        if (i > 0) {
-          sorted[i].growth = sorted[i].positive - sorted[i - 1].positive
-          //growth percentage = sorted[i - 1].positive / (sorted[i].positive - sorted[i - 1].positive)
-        }
-      }
+      const daily = responseCountryTimeline.data
 
-      setData(sorted)
-    } else {
+      const report: DailyReport[] = daily.reverse().map(asDailyReport)
+
+      setData(report.filter((x) => x.positive > 0))
+    }
+  }, [navSelection, requestCountryTimeline.loading])
+
+  useEffect(() => {
+    console.log(
+      `useEffect (STATE) Selection: ${navSelection} Loading: ${
+        requestStatesTimeline.loading
+      } EmptyResponse: ${!responseStatesTimeline}`
+    )
+    if (navSelection !== UNITED_STATES) {
       if (requestStatesTimeline.loading || !responseStatesTimeline) return
 
       const daily = responseStatesTimeline.data
         .filter((x) => x.state === navSelection)
         .reverse()
 
-      const report: DailyReport[] = daily.map((item) => ({
-        positive: item.positive,
-        death: item.death,
-        days: differenceInCalendarDays(
-          parse(item.date.toString(), 'yyyyMMdd', new Date()),
-          new Date('03/04/2020')
-        ),
-        growth: 0
-      }))
+      const report: DailyReport[] = daily.map(asDailyReport)
 
-      for (let i = 0; i < report.length; i++) {
-        if (i > 0) {
-          report[i].growth = report[i].positive - report[i - 1].positive
-        }
-      }
-
-      setData(report)
+      console.log(report, 'REPORT')
+      setData(report.filter((x) => x.positive > 0))
     }
-  }, [navSelection, responseCountryTimeline, responseStatesTimeline])
+  }, [navSelection, requestStatesTimeline.loading])
 
   const loading = !data // assume still loading if data has not been set #TODO: add type to determine errors
-  return [loading, data]
+
+  const lastTwoWeeks = !!data ? data.slice(data.length - 14) : []
+
+  const recent = lastTwoWeeks.reduce(
+    (acc: RecentReport, curr: DailyReport) => {
+      acc.positive += curr.positiveIncrease
+      acc.deaths += curr.deathIncrease
+
+      return acc
+    },
+    { positive: 0, deaths: 0 }
+  )
+
+  return [loading, data, recent]
 }
+
+const asDailyReport: (
+  item: StateDailyReport | CountryDailyReport,
+  idx: number
+) => DailyReport = (item, idx) => ({
+  positive: item.positive,
+  death: item.death,
+  days: idx,
+  positiveIncrease: nonNegative(item.positiveIncrease),
+  deathIncrease: nonNegative(item.deathIncrease),
+  totalTestResultsIncrease: nonNegative(item.totalTestResultsIncrease),
+  hospitalizedIncrease: nonNegative(item.hospitalizedIncrease)
+})
+const nonNegative = (num: number) => (num < 0 ? 0 : num)
 
 export const useCountiesReport = (navSelection: string) => {
   // Counties ------------------------------------------------
@@ -156,3 +180,89 @@ export const useCountiesReport = (navSelection: string) => {
   const loading = !data // assume still loading if data has not been set #TODO: add type to determine errors
   return [loading, data]
 }
+
+// const stateTimelineExample = {
+//   date: 20201121,
+//   state: 'AK',
+//   positive: 26044,
+//   probableCases: null,
+//   negative: 892701,
+//   pending: null,
+//   totalTestResultsSource: 'totalTestsViral',
+//   totalTestResults: 918745,
+//   hospitalizedCurrently: 129,
+//   hospitalizedCumulative: 612,
+//   inIcuCurrently: null,
+//   inIcuCumulative: null,
+//   onVentilatorCurrently: 14,
+//   onVentilatorCumulative: null,
+//   recovered: 7165,
+//   dataQualityGrade: 'A',
+//   lastUpdateEt: '11/21/2020 03:59',
+//   dateModified: '2020-11-21T03:59:00Z',
+//   checkTimeEt: '11/20 22:59',
+//   death: 102,
+//   hospitalized: 612,
+//   dateChecked: '2020-11-21T03:59:00Z',
+//   totalTestsViral: 918745,
+//   positiveTestsViral: 31523,
+//   negativeTestsViral: 886676,
+//   positiveCasesViral: null,
+//   deathConfirmed: 102,
+//   deathProbable: null,
+//   totalTestEncountersViral: null,
+//   totalTestsPeopleViral: null,
+//   totalTestsAntibody: null,
+//   positiveTestsAntibody: null,
+//   negativeTestsAntibody: null,
+//   totalTestsPeopleAntibody: null,
+//   positiveTestsPeopleAntibody: null,
+//   negativeTestsPeopleAntibody: null,
+//   totalTestsPeopleAntigen: null,
+//   positiveTestsPeopleAntigen: null,
+//   totalTestsAntigen: null,
+//   positiveTestsAntigen: null,
+//   fips: '02',
+//   positiveIncrease: 675,
+//   negativeIncrease: 13358,
+//   total: 918745,
+//   totalTestResultsIncrease: 14033,
+//   posNeg: 918745,
+//   deathIncrease: 1,
+//   hospitalizedIncrease: 6,
+//   hash: '0d51b28ef5ce194e5dc76dcf4e15162d75123d17',
+//   commercialScore: 0,
+//   negativeRegularScore: 0,
+//   negativeScore: 0,
+//   positiveScore: 0,
+//   score: 0,
+//   grade: ''
+// }
+
+// const countryTimelineExample = {
+//   date: 20201121,
+//   states: 56,
+//   positive: 11927256,
+//   negative: 143010617,
+//   pending: 17683,
+//   hospitalizedCurrently: 83227,
+//   hospitalizedCumulative: 540906,
+//   inIcuCurrently: 16054,
+//   inIcuCumulative: 28693,
+//   onVentilatorCurrently: 5103,
+//   onVentilatorCumulative: 3087,
+//   recovered: 4529700,
+//   dateChecked: '2020-11-21T24:00:00Z',
+//   death: 247043,
+//   hospitalized: 540906,
+//   totalTestResults: 177614398,
+//   lastModified: '2020-11-21T24:00:00Z',
+//   total: 0,
+//   posNeg: 0,
+//   deathIncrease: 1506,
+//   hospitalizedIncrease: 3241,
+//   negativeIncrease: 1426550,
+//   positiveIncrease: 178309,
+//   totalTestResultsIncrease: 1977400,
+//   hash: 'cf675a8bdc6204a364c0fe4779d944ae529c617d'
+// }
