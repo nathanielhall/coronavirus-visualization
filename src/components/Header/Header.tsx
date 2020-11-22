@@ -1,14 +1,12 @@
-import React, { ReactNode, FC } from 'react'
+import React, { FC } from 'react'
 import {
   makeStyles,
   createStyles,
   Theme,
   AppBar,
-  Toolbar,
-  Typography
+  Typography,
+  Toolbar
 } from '@material-ui/core'
-import IconButton from '@material-ui/core/IconButton'
-import MenuIcon from '@material-ui/icons/Menu'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -20,40 +18,26 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     title: {
       flexGrow: 1
+    },
+    colorPrimary: {
+      backgroundColor: '#fff', //'#8884d8'
+      color: '#000'
     }
   })
 )
 
 export type HeaderProps = {
   title: string
-  handleDrawerOpen?: () => void
-  children?: ReactNode
 }
-export const Header: FC<HeaderProps> = ({
-  handleDrawerOpen,
-  title,
-  children
-}) => {
+export const Header: FC<HeaderProps> = ({ title }) => {
   const classes = useStyles()
 
   return (
-    <AppBar position="static">
+    <AppBar className={classes.colorPrimary} position="fixed">
       <Toolbar variant="dense">
-        {handleDrawerOpen && (
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-            onClick={handleDrawerOpen}
-          >
-            <MenuIcon />
-          </IconButton>
-        )}
-        <Typography variant="h6" className={classes.title}>
+        <Typography variant="h5" className={classes.title}>
           {title}
         </Typography>
-        {children}
       </Toolbar>
     </AppBar>
   )
