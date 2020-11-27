@@ -2,7 +2,7 @@ import React, { useState, FC } from 'react'
 import { Grid, Container, Select, MenuItem } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
-import { Card, Panel } from './Statistics'
+import { Card, Panel, PanelBody, PanelTitle } from './Statistics'
 import { states } from './states'
 import { useReport, useTimelineReport } from './data-provider'
 import { DailyReport } from './types'
@@ -43,8 +43,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 export const Layout = () => {
-  const classes = useStyles()
-
   const defaultSelection = { key: 'US', value: 'Overall U.S' }
   const navigationOptions = [defaultSelection, ...states]
   const [navSelection, setNavSelection] = useState(defaultSelection.key)
@@ -61,29 +59,11 @@ export const Layout = () => {
     <div>
       {/* <Header title="COVID-19 Dashboard" /> */}
       <Container fixed>
-        <Select
-          disableUnderline
-          className={classes.navigation}
+        <Navigation
           value={navSelection}
-          onChange={(e) => setNavSelection(e.target.value as string)}
-          MenuProps={{
-            anchorOrigin: {
-              vertical: 'bottom',
-              horizontal: 'left'
-            },
-            transformOrigin: {
-              vertical: 'top',
-              horizontal: 'left'
-            },
-            getContentAnchorEl: null
-          }}
-        >
-          {navigationOptions.map((s) => (
-            <MenuItem key={s.key} value={s.key}>
-              {s.value}
-            </MenuItem>
-          ))}
-        </Select>
+          onChange={setNavSelection}
+          options={navigationOptions}
+        />
         <Grid container spacing={3}>
           <Grid item xs>
             <AsyncComponent loading={reportLoading}>
@@ -117,26 +97,24 @@ export const Layout = () => {
           </Grid>
         </Grid>
 
-        <Select
-          onChange={(e) => setSelectedDailyChart(e.target.value as string)}
-          value={selectedDailyChart}
-        >
-          <MenuItem value="positiveIncrease">Cases</MenuItem>
-          <MenuItem value="deathIncrease">Fatalities</MenuItem>
-          <MenuItem value="totalTestResultsIncrease">Testing</MenuItem>
-          <MenuItem value="hospitalizedIncrease">Hospitalized</MenuItem>
-        </Select>
-
         <Grid container spacing={3}>
           <Grid item xs>
-            <Panel title={''} loading={dailyReportLoading}>
-              {!!dailyReport && (
-                <DailyReportChart
-                  data={dailyReport}
-                  xAxis={'days'}
-                  yAxis={selectedDailyChart}
+            <Panel>
+              <PanelTitle>
+                <DailyChartDropdown
+                  value={selectedDailyChart}
+                  onChange={setSelectedDailyChart}
                 />
-              )}
+              </PanelTitle>
+              <PanelBody loading={dailyReportLoading}>
+                {!!dailyReport && (
+                  <DailyReportChart
+                    data={dailyReport}
+                    xAxis={'days'}
+                    yAxis={selectedDailyChart}
+                  />
+                )}
+              </PanelBody>
             </Panel>
           </Grid>
         </Grid>
@@ -148,28 +126,6 @@ export const Layout = () => {
     </div>
   )
 }
-// type DailyChartProps = {
-//   loading: boolean
-//   title: string
-//   data: DailyReport[] | undefined
-//   xAxis: string
-//   yAxis: string
-// }
-// const DailyChart: FC<DailyChartProps> = ({
-//   loading,
-//   title,
-//   data,
-//   xAxis,
-//   yAxis
-// }) => (
-//   <Grid container spacing={3}>
-//     <Grid item xs>
-//       <Panel title={title} loading={loading}>
-//         {!!data && <DailyReportChart data={data} xAxis={xAxis} yAxis={yAxis} />}
-//       </Panel>
-//     </Grid>
-//   </Grid>
-// )
 
 type AsyncComponentProps = {
   children: React.ReactNode
@@ -198,22 +154,94 @@ const DailyReportChart: FC<DailyReportChartProps> = ({
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey={xAxis} />
       <YAxis />
-      <Tooltip />
+      <Tooltip
+      // content={(props: CustomTooltipProps) => <CustomTooltip {...props} />}
+      />
       <Bar dataKey={yAxis} fill="#8884d8" />
     </BarChart>
   </ResponsiveContainer>
 )
-// type TotalCasesProps = {
-//   data: DailyReport[]
+
+// type CustomTooltipProps = {
+//   type: string
+//   payload: string
+//   label: string
+//   active: boolean
 // }
-// const TotalCases: FC<TotalCasesProps> = ({ data }) => (
-//   <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
-//     <RCLineChart data={data}>
-//       <CartesianGrid strokeDasharray="3 3" />
-//       <XAxis dataKey="days" />
-//       <YAxis />
-//       <Tooltip />
-//       <Line type="monotone" dataKey="positive" stroke="#8884d8" />
-//     </RCLineChart>
-//   </ResponsiveContainer>
-// )
+// const CustomTooltip: FC<CustomTooltipProps> = ({
+//   label,
+//   payload,
+//   type,
+//   active
+// }) => {
+//   console.log(payload)
+//   return (
+//     <div>
+//       <p>{label}</p>
+//     </div>
+//   )
+//   // return <pre>{JSON.stringify({ label, payload, active, type }, null, 2)}</pre>
+// }
+
+type SelectDailyChartProps = {
+  value: string
+  onChange: (selection: string) => void
+}
+const DailyChartDropdown: FC<SelectDailyChartProps> = ({ value, onChange }) => (
+  <Select
+    disableUnderline
+    MenuProps={{
+      anchorOrigin: {
+        vertical: 'bottom',
+        horizontal: 'left'
+      },
+      transformOrigin: {
+        vertical: 'top',
+        horizontal: 'left'
+      },
+      getContentAnchorEl: null
+    }}
+    onChange={(e) => onChange(e.target.value as string)}
+    value={value}
+  >
+    <MenuItem value="positiveIncrease">Daily Cases</MenuItem>
+    <MenuItem value="deathIncrease">Daily Fatalities</MenuItem>
+    <MenuItem value="totalTestResultsIncrease">Daily Testing</MenuItem>
+    <MenuItem value="hospitalizedIncrease">Daily Hospitalized</MenuItem>
+  </Select>
+)
+
+type NavigationProps = {
+  options: Array<{ key: string; value: string }>
+  value: string
+  onChange: (opton: string) => void
+  className?: string
+}
+const Navigation: FC<NavigationProps> = ({ options, value, onChange }) => {
+  const classes = useStyles()
+  return (
+    <Select
+      disableUnderline
+      className={classes.navigation}
+      value={value}
+      onChange={(e) => onChange(e.target.value as string)}
+      MenuProps={{
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'left'
+        },
+        transformOrigin: {
+          vertical: 'top',
+          horizontal: 'left'
+        },
+        getContentAnchorEl: null
+      }}
+    >
+      {options.map((s) => (
+        <MenuItem key={s.key} value={s.key}>
+          {s.value}
+        </MenuItem>
+      ))}
+    </Select>
+  )
+}

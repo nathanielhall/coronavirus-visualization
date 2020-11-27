@@ -47,36 +47,45 @@ export const Card: FC<CardProps> = ({ title, primary, secondary }) => {
 
 type PanelProps = {
   children: React.ReactNode
-  title: string
+}
+export const Panel: FC<PanelProps> = ({ children }) => {
+  const classes = useStyles()
+  return <div className={classes.root}>{children}</div>
+}
+
+type PanelBodyProps = {
+  children: React.ReactNode
   loading: boolean
 }
-export const Panel: FC<PanelProps> = ({ children, title, loading = false }) => {
+export const PanelBody: FC<PanelBodyProps> = ({ children, loading }) => {
   const classes = useStyles()
-
   return (
-    <div className={classes.root}>
-      <MuiCard className={classes.panelheader} variant="outlined">
-        <Typography className={classes.title} variant="h6">
-          {title}
-        </Typography>
-      </MuiCard>
-      <MuiCard className={classes.panelbody} variant="outlined">
-        <CardContent>
-          {loading ? (
-            <Skeleton variant="rect" width="100%" height="400px" />
-          ) : (
-            children
-          )}
-        </CardContent>
-      </MuiCard>
-    </div>
+    <MuiCard className={classes.panelbody} variant="outlined">
+      <CardContent>
+        {loading ? (
+          <Skeleton variant="rect" width="100%" height="400px" />
+        ) : (
+          children
+        )}
+      </CardContent>
+    </MuiCard>
   )
 }
 
-/* <Typography
-          style={{ display: 'inline', paddingRight: '5px' }}
-          variant="h5"
-        >
-          {primary}
+type PanelTitleProps = {
+  children: React.ReactNode
+  title?: string
+}
+export const PanelTitle: FC<PanelTitleProps> = ({ children, title }) => {
+  const classes = useStyles()
+  return (
+    <MuiCard className={classes.panelheader} variant="outlined">
+      {title && (
+        <Typography className={classes.title} variant="h6">
+          {title}
         </Typography>
-        {secondary && <Typography variant="caption">{secondary}</Typography>} */
+      )}
+      {children}
+    </MuiCard>
+  )
+}
