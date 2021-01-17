@@ -22,7 +22,6 @@ export const Dashboard = () => {
 
   return (
     <div>
-      {/* <Header title="COVID-19 Dashboard" /> */}
       <Container fixed>
         <Navigation
           value={navSelection}
