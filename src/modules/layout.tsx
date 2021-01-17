@@ -5,16 +5,15 @@ import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 import { Card, Panel, PanelBody, PanelTitle } from './Statistics'
 import { states } from './states'
 import { useReport, useTimelineReport } from './data-provider'
-// import { DailyReport } from './types'
+import { DailyReport } from './types'
 import {
   CartesianGrid,
   XAxis,
   YAxis,
   ResponsiveContainer,
   Tooltip,
-  // Legend
-  // BarChart,
-  // Bar,
+  BarChart,
+  Bar,
   Line,
   LineChart,
   Legend
@@ -101,10 +100,32 @@ export const Layout = () => {
           <Grid item xs>
             <Panel>
               <PanelTitle>
+                <div style={{ display: 'inline' }}>Daily Cases: Bar Chart</div>
+              </PanelTitle>
+              <PanelBody loading={dailyReportLoading}>
+                {!!dailyReport && (
+                  <>
+                    <DailyReportChart
+                      data={dailyReport}
+                      xAxis={'days'}
+                      yAxis={'positiveIncrease'}
+                    />
+                  </>
+                )}
+              </PanelBody>
+            </Panel>
+          </Grid>
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs>
+            <Panel>
+              <PanelTitle>
                 <>
-                  <div style={{ display: 'inline' }}>Total Cases</div>
+                  <div style={{ display: 'inline' }}>
+                    Daily Cases: Line Chart
+                  </div>
 
-                  <div>
+                  <div style={{ float: 'right' }}>
                     Right Y-Axis &nbsp;
                     <DailyChartDropdown
                       value={selectedDailyChart}
@@ -116,11 +137,6 @@ export const Layout = () => {
               <PanelBody loading={dailyReportLoading}>
                 {!!dailyReport && (
                   <>
-                    {/* <DailyReportChart
-                      data={dailyReport}
-                      xAxis={'days'}
-                      yAxis={selectedDailyChart}
-                    /> */}
                     <BiaxialLineChart
                       data={dailyReport}
                       yAxis={selectedDailyChart}
@@ -154,65 +170,69 @@ const AsyncComponent: FC<AsyncComponentProps> = ({ children, loading }) => {
   return <>{children}</>
 }
 
-// type DailyReportChartProps = {
-//   data: DailyReport[]
-//   xAxis: string
-//   yAxis: string
-// }
-// const DailyReportChart: FC<DailyReportChartProps> = ({
-//   data,
-//   xAxis,
-//   yAxis
-// }) => (
-//   <ChartContainer>
-//     <BarChart data={data}>
-//       <CartesianGrid strokeDasharray="3 3" />
-//       <XAxis dataKey={xAxis} />
-//       <YAxis />
-//       <Tooltip
-//         content={(props: any) => (
-//           <CustomTooltip
-//             payload={props.active ? props.payload[0].payload : undefined}
-//             label={props.label}
-//             active={props.active}
-//           />
-//         )}
-//         //content={<CustomTooltip />}
-//       />
-//       <Bar dataKey={yAxis} fill="#8884d8" />
-//     </BarChart>
-//   </ChartContainer>
-// )
+type DailyReportChartProps = {
+  data: DailyReport[]
+  xAxis: string
+  yAxis: string
+}
+const DailyReportChart: FC<DailyReportChartProps> = ({
+  data,
+  xAxis,
+  yAxis
+}) => (
+  <ChartContainer>
+    <BarChart data={data}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey={xAxis} />
+      <YAxis />
+      <Tooltip
+        content={(props: any) => (
+          <CustomTooltip
+            payload={
+              props.active && props.payload[0]
+                ? props.payload[0].payload
+                : undefined
+            }
+            label={props.label}
+            active={props.active}
+          />
+        )}
+        //content={<CustomTooltip />}
+      />
+      <Bar dataKey={yAxis} fill="#8884d8" />
+    </BarChart>
+  </ChartContainer>
+)
 
-// type CustomTooltipProps = {
-//   payload: any
-//   label: string
-//   active: boolean
-// }
+type CustomTooltipProps = {
+  payload: any
+  label: string
+  active: boolean
+}
 
-// const CustomTooltip: FC<CustomTooltipProps> = ({ label, payload, active }) => {
-//   if (!active || !payload) return null
+const CustomTooltip: FC<CustomTooltipProps> = ({ label, payload, active }) => {
+  if (!active || !payload) return null
 
-//   return (
-//     <div
-//       style={{
-//         backgroundColor: '#fff',
-//         padding: '8px',
-//         border: '1px solid #000'
-//       }}
-//     >
-//       <dl>
-//         <dt>Day</dt>
-//         <dd>{label}</dd>
-//         <dt>Cases</dt>
-//         <dd>{payload.positiveIncrease}</dd>
-//         <dt>Deaths</dt>
-//         <dd>{payload.deathIncrease}</dd>
-//       </dl>
-//     </div>
-//   )
-//   // return <pre>{JSON.stringify({ label, payload, active, type }, null, 2)}</pre>
-// }
+  return (
+    <div
+      style={{
+        backgroundColor: '#fff',
+        padding: '8px',
+        border: '1px solid #000'
+      }}
+    >
+      <dl>
+        <dt>Day</dt>
+        <dd>{label}</dd>
+        <dt>Cases</dt>
+        <dd>{payload.positiveIncrease}</dd>
+        <dt>Deaths</dt>
+        <dd>{payload.deathIncrease}</dd>
+      </dl>
+    </div>
+  )
+  // return <pre>{JSON.stringify({ label, payload, active, type }, null, 2)}</pre>
+}
 
 type BiaxialLineChartProps = {
   data: any
