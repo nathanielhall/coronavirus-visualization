@@ -5,9 +5,8 @@ import { states } from './states'
 import { useReport, useTimelineReport } from './data-provider'
 import { AsyncComponent } from '../components/AsyncComponent'
 import { DailyReportChart } from '../components/DailyReportChart'
-import { BiaxialLineChart } from '../components/BiaxialLineChart'
 import { Navigation } from '../components/Navigation'
-import { DailyChartDropdown } from '../components/DailyChartDropdown'
+import { DailyCasesLineChart } from '../components/DailyCasesLineChart'
 
 export const Dashboard = () => {
   const defaultSelection = { key: 'US', value: 'Overall U.S' }
@@ -19,7 +18,8 @@ export const Dashboard = () => {
     navSelection
   )
 
-  const [selectedDailyChart, setSelectedDailyChart] = useState('deathIncrease')
+  console.log('Dashboard rendering')
+
   return (
     <div>
       {/* <Header title="COVID-19 Dashboard" /> */}
@@ -84,33 +84,10 @@ export const Dashboard = () => {
         </Grid>
         <Grid container spacing={3}>
           <Grid item xs>
-            <Panel>
-              <PanelTitle>
-                <>
-                  <div style={{ display: 'inline' }}>
-                    Daily Cases: Line Chart
-                  </div>
-
-                  <div style={{ float: 'right' }}>
-                    Right Y-Axis &nbsp;
-                    <DailyChartDropdown
-                      value={selectedDailyChart}
-                      onChange={setSelectedDailyChart}
-                    />
-                  </div>
-                </>
-              </PanelTitle>
-              <PanelBody loading={dailyReportLoading}>
-                {!!dailyReport && (
-                  <>
-                    <BiaxialLineChart
-                      data={dailyReport}
-                      yAxis={selectedDailyChart}
-                    />
-                  </>
-                )}
-              </PanelBody>
-            </Panel>
+            <DailyCasesLineChart
+              loading={dailyReportLoading}
+              data={dailyReport}
+            />
           </Grid>
         </Grid>
       </Container>
