@@ -1,1 +1,0 @@
-export { GrowthChart } from './GrowthChart'
