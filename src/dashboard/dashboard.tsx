@@ -9,7 +9,7 @@ import { BiaxialLineChart } from '../components/BiaxialLineChart'
 import { Navigation } from '../components/Navigation'
 import { DailyChartDropdown } from '../components/DailyChartDropdown'
 
-export const Layout = () => {
+export const Dashboard = () => {
   const defaultSelection = { key: 'US', value: 'Overall U.S' }
   const navigationOptions = [defaultSelection, ...states]
   const [navSelection, setNavSelection] = useState(defaultSelection.key)

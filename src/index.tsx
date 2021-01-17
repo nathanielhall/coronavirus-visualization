@@ -1,5 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Layout } from './modules'
+import { Dashboard } from './dashboard'
 
-ReactDOM.render(<Layout />, document.getElementById('root'))
+ReactDOM.render(<Dashboard />, document.getElementById('root'))
