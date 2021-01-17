@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { DailyReport } from './types'
+import { DailyReport } from '../modules/types'
 import {
   CartesianGrid,
   XAxis,
