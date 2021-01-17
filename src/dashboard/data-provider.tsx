@@ -9,7 +9,7 @@ import {
   Report,
   Location,
   RecentReport
-} from './types'
+} from '../types'
 import { getStateName } from './states'
 // import {
 //   // differenceInCalendarDays,
