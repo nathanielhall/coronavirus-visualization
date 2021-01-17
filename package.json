@@ -60,7 +60,7 @@
     "@material-ui/pickers": "^3.2.10",
     "@types/enzyme": "^3.10.5",
     "@types/recharts": "^1.8.9",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "date-fns": "^2.11.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
