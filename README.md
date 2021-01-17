@@ -1,15 +1,7 @@
 # Coronavirus Visualization <img alt="Travis CI badge" src="https://travis-ci.org/nathanielhall/meteorite-impact-visualization.svg?branch=refactor">
 
-> COVID-19 visualization across the United States using React and React-Leaflet
-> Map. The data comes from
-> [COVID-19 API](https://github.com/mathdroid/covid-19-api) and
-> [Coronavirus Tracker API](https://github.com/ExpDev07/coronavirus-tracker-api)
-
-## System Requirements
-
-- [Git](https://git-scm.com/) v2 or greater
-- [NodeJS](https://nodejs.org/en/) v11 or greater
-- [npm](https://www.npmjs.com/) v6 or greater
+> COVID-19 dashboard across the United States using the ReCharts and
+> [Covid Tracking API](https://covidtracking.com/data/api)
 
 ## Setup
 
