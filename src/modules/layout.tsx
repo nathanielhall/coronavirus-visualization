@@ -16,7 +16,9 @@ import {
   Bar,
   Line,
   LineChart,
-  Legend
+  Legend,
+  ReferenceLine,
+  Brush
   // Treemap as RCTreemap
 } from 'recharts'
 
@@ -53,7 +55,7 @@ export const Layout = () => {
     navSelection
   )
 
-  const [selectedDailyChart, setSelectedDailyChart] = useState('none')
+  const [selectedDailyChart, setSelectedDailyChart] = useState('deathIncrease')
   return (
     <div>
       {/* <Header title="COVID-19 Dashboard" /> */}
@@ -199,6 +201,8 @@ const DailyReportChart: FC<DailyReportChartProps> = ({
         )}
         //content={<CustomTooltip />}
       />
+      <ReferenceLine y={0} stroke="#000" />
+      <Brush dataKey={xAxis} height={30} stroke="#8884d8" />
       <Bar dataKey={yAxis} fill="#8884d8" />
     </BarChart>
   </ChartContainer>
@@ -261,7 +265,7 @@ const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
           activeDot={{ r: 8 }}
           dot={false}
         />
-        <YAxis yAxisId="right" orientation="right" />
+        {yAxis !== 'none' && <YAxis yAxisId="right" orientation="right" />}
         <Line
           yAxisId="right"
           type="monotone"
