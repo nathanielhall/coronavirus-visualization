@@ -11,10 +11,7 @@ import {
   RecentReport
 } from '../types'
 import { getStateName } from './states'
-// import {
-//   // differenceInCalendarDays,
-//   parse
-// } from 'date-fns'
+import { parse } from 'date-fns'
 import { useEffect, useState } from 'react'
 
 const UNITED_STATES = 'US'
@@ -146,15 +143,19 @@ export const useTimelineReport: (
 const asDailyReport: (
   item: StateDailyReport | CountryDailyReport,
   idx: number
-) => DailyReport = (item, idx) => ({
-  positive: item.positive,
-  death: item.death,
-  days: idx,
-  positiveIncrease: nonNegative(item.positiveIncrease),
-  deathIncrease: nonNegative(item.deathIncrease),
-  totalTestResultsIncrease: nonNegative(item.totalTestResultsIncrease),
-  hospitalizedIncrease: nonNegative(item.hospitalizedIncrease)
-})
+) => DailyReport = (item, idx) => {
+  return {
+    positive: item.positive,
+    death: item.death,
+    days: idx,
+    date: parse(item.date.toString(), 'yyyyMMdd', new Date()),
+    positiveIncrease: nonNegative(item.positiveIncrease),
+    deathIncrease: nonNegative(item.deathIncrease),
+    totalTestResultsIncrease: nonNegative(item.totalTestResultsIncrease),
+    hospitalizedIncrease: nonNegative(item.hospitalizedIncrease)
+  }
+}
+
 const nonNegative = (num: number) => (num < 0 ? 0 : num)
 
 export const useCountiesReport = (navSelection: string) => {

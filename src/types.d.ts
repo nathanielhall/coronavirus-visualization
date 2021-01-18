@@ -17,26 +17,9 @@ export type Location = {
   timelines: { confirmed: { timeline: { [key: string]: number } } }
 }
 
-export type CountryApi = {
-  location: Location
-}
-
 export type LocationsApi = {
   latest: LocationCount
   locations: Location[]
-}
-
-export type Province = {
-  name: string
-  latitude: number
-  longitude: number
-  latest: LocationCount
-}
-
-export type TimelineValue = {
-  key: string // formatted date
-  confirmed: number
-  type: 'confirmed' | 'deaths' | 'recovered'
 }
 
 export type RecentReport = { positive: number; deaths: number }
@@ -45,7 +28,7 @@ export type DailyReport = {
   positive: number
   death: number
   days: number
-  // formattedDate: string
+  date: Date
   positiveIncrease: number
   deathIncrease: number
   totalTestResultsIncrease: number
@@ -63,11 +46,6 @@ export type Report = {
   // onVentilatorCurrently: number
 }
 
-export type NavListItem = {
-  id: string
-  primary: string
-  secondary: string
-}
 export type CountryReport = {
   positive: number
   negative: number
