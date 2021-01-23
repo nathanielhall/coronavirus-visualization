@@ -32,6 +32,7 @@ export const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
         <Line
           yAxisId="left"
           type="monotone"
+          name="Cases"
           dataKey="positiveIncrease"
           stroke="#8884d8"
           activeDot={{ r: 8 }}
@@ -40,6 +41,7 @@ export const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
         {yAxis !== 'none' && <YAxis yAxisId="right" orientation="right" />}
         <Line
           yAxisId="right"
+          name={NameLookup[yAxis]}
           type="monotone"
           dataKey={yAxis}
           stroke="#82ca9d"
@@ -48,4 +50,11 @@ export const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
       </LineChart>
     </ChartContainer>
   )
+}
+
+type NameLookupType = { [index: string]: string }
+const NameLookup: NameLookupType = {
+  totalTestResultsIncrease: 'Tests',
+  deathIncrease: 'Fatalities',
+  hospitalizedIncrease: 'Hospitalizations'
 }

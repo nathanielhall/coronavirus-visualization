@@ -69,14 +69,10 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ label, payload, active }) => {
         height: '100%'
       }}
     >
-      <div style={{ paddingBottom: '10px' }}>
-        <div>Day</div>
-        <div>{format(day, 'MM-dd-yyyy')}</div>
-      </div>
       <div>
-        <div>Cases</div>
-        <div>{cases.toLocaleString()}</div>
+        <strong>{format(day, 'MMMM d, yyyy')}</strong>
       </div>
+      <div>{cases.toLocaleString()}</div>
     </div>
   )
 }
