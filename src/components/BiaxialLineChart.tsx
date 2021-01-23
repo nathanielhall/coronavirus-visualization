@@ -9,6 +9,7 @@ import {
   LineChart,
   Legend
 } from 'recharts'
+import { format } from 'date-fns'
 
 type BiaxialLineChartProps = {
   data: any
@@ -27,7 +28,19 @@ export const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="days" />
         <YAxis yAxisId="left" />
-        <Tooltip />
+        <Tooltip
+          content={(props: any) => (
+            <CustomTooltip
+              payload={
+                props.active && props.payload[0]
+                  ? props.payload[0].payload
+                  : undefined
+              }
+              label={yAxis}
+              active={props.active}
+            />
+          )}
+        />
         <Legend />
         <Line
           yAxisId="left"
@@ -57,4 +70,39 @@ const NameLookup: NameLookupType = {
   totalTestResultsIncrease: 'Tests',
   deathIncrease: 'Fatalities',
   hospitalizedIncrease: 'Hospitalizations'
+}
+
+type CustomTooltipProps = {
+  payload: any
+  label: string
+  active: boolean
+}
+const CustomTooltip: FC<CustomTooltipProps> = ({ label, payload, active }) => {
+  if (!active || !payload) return null
+
+  const day: Date = payload.date
+
+  const cases: number = payload.positiveIncrease
+  const yAxisLabel = NameLookup[label]
+  const yAxisValue: number = payload[label]
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#fff',
+        padding: '8px',
+        border: '1px solid #000',
+        width: '100%',
+        height: '100%'
+      }}
+    >
+      <div>
+        <strong>{format(day, 'MMMM d, yyyy')}</strong>
+      </div>
+      <div>Cases: {cases.toLocaleString()}</div>
+      <div>
+        {yAxisLabel}: {yAxisValue.toLocaleString()}
+      </div>
+    </div>
+  )
 }
