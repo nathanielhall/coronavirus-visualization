@@ -7,7 +7,9 @@ import {
   Tooltip,
   Line,
   LineChart,
-  Legend
+  Legend,
+  ReferenceLine,
+  Brush
 } from 'recharts'
 import { format } from 'date-fns'
 
@@ -60,6 +62,9 @@ export const BiaxialLineChart: FC<BiaxialLineChartProps> = ({
           stroke="#82ca9d"
           dot={false}
         />
+
+        <ReferenceLine y={0} yAxisId={'left'} stroke="#000" />
+        <Brush dataKey={'days'} height={30} stroke="#8884d8" />
       </LineChart>
     </ChartContainer>
   )
