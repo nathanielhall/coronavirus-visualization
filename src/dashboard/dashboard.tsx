@@ -89,6 +89,33 @@ export const Dashboard = () => {
             />
           </Grid>
         </Grid>
+
+        <Grid container spacing={3}>
+          <Grid item xs>
+            <div style={{ textAlign: 'center' }}>
+              <p>
+                <strong>US Covid Dashboard</strong>
+              </p>
+              <p>
+                The{' '}
+                <a
+                  href="https://github.com/nathanielhall/coronavirus-visualization"
+                  target="_blank"
+                >
+                  {' '}
+                  website source
+                </a>{' '}
+                can be found on GitHub
+              </p>
+              <p>
+                Data from{' '}
+                <a href="https://covidtracking.com/" target="_blank">
+                  The COVID Tracking Project
+                </a>
+              </p>
+            </div>
+          </Grid>
+        </Grid>
       </Container>
     </div>
   )
