@@ -74,7 +74,8 @@ type NameLookupType = { [index: string]: string }
 const NameLookup: NameLookupType = {
   totalTestResultsIncrease: 'Tests',
   deathIncrease: 'Fatalities',
-  hospitalizedIncrease: 'Hospitalizations'
+  hospitalizedIncrease: 'Hospitalizations',
+  none: ''
 }
 
 type CustomTooltipProps = {
@@ -105,9 +106,11 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ label, payload, active }) => {
         <strong>{format(day, 'MMMM d, yyyy')}</strong>
       </div>
       <div>Cases: {cases.toLocaleString()}</div>
-      <div>
-        {yAxisLabel}: {yAxisValue.toLocaleString()}
-      </div>
+      {!!yAxisValue && (
+        <div>
+          {yAxisLabel}: {yAxisValue.toLocaleString()}
+        </div>
+      )}
     </div>
   )
 }
