@@ -97,9 +97,9 @@ export const useTimelineReport: (
 
       const daily = responseCountryTimeline.data
 
-      const report: DailyReport[] = daily.reverse().map(asDailyReport)
+      const report: DailyReport[] = daily.map(asDailyReport)
 
-      setData(report.filter((x) => x.positive > 0))
+      setData(report.reverse().filter((x) => x.positive > 0))
     }
   }, [navSelection, requestCountryTimeline.loading])
 
@@ -171,6 +171,7 @@ export const useCountiesReport = (navSelection: string) => {
 
     if (requestCounties.loading || !responseCounties) return
 
+    console.log('retrieving counties')
     const result = responseCounties.data.locations.filter(
       (x) => x.province === getStateName(navSelection)
     )
