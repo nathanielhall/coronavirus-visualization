@@ -17,7 +17,6 @@ const request: <T = any>(
   config: RequestConfig
 ) => Promise<Response<T>> = async (config) => {
   const onSuccess = (response: Response) => {
-    console.debug('Success!', response)
     return response
   }
 

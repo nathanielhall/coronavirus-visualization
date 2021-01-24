@@ -34,7 +34,6 @@ export const useReport: (
     if (navSelection === UNITED_STATES) {
       if (requestCountry.loading || !responseCountry) return
 
-      console.log('process report')
       const { positive, death, lastModified } = responseCountry.data[0]
       setData({
         title: 'United States',
@@ -49,7 +48,6 @@ export const useReport: (
     if (navSelection !== UNITED_STATES) {
       if (requestStates.loading || !responseStates) return
 
-      console.log('process report')
       const item = responseStates.data.find((x) => x.state === navSelection)
       if (!item) return
 
@@ -84,19 +82,10 @@ export const useTimelineReport: (
   const [data, setData] = useState<DailyReport[] | undefined>(undefined)
 
   useEffect(() => {
-    console.log(
-      `useEffect (COUNTRY) Selection: ${navSelection} Loading: ${
-        requestCountryTimeline.loading
-      } EmptyResponse: ${!responseCountryTimeline}`
-    )
-
     if (navSelection === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
 
-      console.log('process data')
-
       const daily = responseCountryTimeline.data
-
       const report: DailyReport[] = daily.map(asDailyReport)
 
       setData(report.reverse().filter((x) => x.positive > 0))
@@ -104,11 +93,6 @@ export const useTimelineReport: (
   }, [navSelection, requestCountryTimeline.loading])
 
   useEffect(() => {
-    console.log(
-      `useEffect (STATE) Selection: ${navSelection} Loading: ${
-        requestStatesTimeline.loading
-      } EmptyResponse: ${!responseStatesTimeline}`
-    )
     if (navSelection !== UNITED_STATES) {
       if (requestStatesTimeline.loading || !responseStatesTimeline) return
 
@@ -118,7 +102,6 @@ export const useTimelineReport: (
 
       const report: DailyReport[] = daily.map(asDailyReport)
 
-      console.log(report, 'REPORT')
       setData(report.filter((x) => x.positive > 0))
     }
   }, [navSelection, requestStatesTimeline.loading])
@@ -168,10 +151,8 @@ export const useCountiesReport = (navSelection: string) => {
 
   useEffect(() => {
     if (navSelection === UNITED_STATES) return
-
     if (requestCounties.loading || !responseCounties) return
 
-    console.log('retrieving counties')
     const result = responseCounties.data.locations.filter(
       (x) => x.province === getStateName(navSelection)
     )

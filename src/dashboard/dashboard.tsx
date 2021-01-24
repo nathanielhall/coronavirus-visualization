@@ -18,8 +18,6 @@ export const Dashboard = () => {
     navSelection
   )
 
-  console.log('Dashboard rendering')
-
   return (
     <div>
       <Container fixed>
