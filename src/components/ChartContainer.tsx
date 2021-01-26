@@ -3,8 +3,4 @@ import { ResponsiveContainer } from 'recharts'
 
 export const ChartContainer: FC<{ children: React.ReactNode }> = ({
   children
-}) => (
-  <ResponsiveContainer width={'100%'} aspect={4.0 / 1.25}>
-    {children}
-  </ResponsiveContainer>
-)
+}) => <ResponsiveContainer height={400}>{children}</ResponsiveContainer>
