@@ -85,10 +85,14 @@ export const useTimelineReport: (
     if (navSelection === UNITED_STATES) {
       if (requestCountryTimeline.loading || !responseCountryTimeline) return
 
-      const daily = responseCountryTimeline.data
-      const report: DailyReport[] = daily.map(asDailyReport)
+      const copy = Array.from(responseCountryTimeline.data)
 
-      setData(report.reverse().filter((x) => x.positive > 0))
+      setData(
+        copy
+          .reverse()
+          .map(asDailyReport)
+          .filter((x) => x.positive > 0)
+      )
     }
   }, [navSelection, requestCountryTimeline.loading])
 
