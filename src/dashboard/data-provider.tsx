@@ -1,4 +1,4 @@
-import { useApi } from 'src/api'
+import { useApi } from '@nathanielhall/useapi'
 import {
   LocationsApi,
   StateDailyReport,
