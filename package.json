@@ -60,7 +60,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@material-ui/pickers": "^3.2.10",
-    "@nathanielhall/useapi": "^1.0.3",
+    "@nathanielhall/useapi": "^1.0.5",
     "@types/enzyme": "^3.10.8",
     "@types/recharts": "^1.8.19",
     "axios": "^0.21.1",
